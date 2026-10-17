@@ -525,19 +525,29 @@
   let items = [];
   try {
     let saved = localStorage.getItem('lightSunItems');
-    items = saved ? JSON.parse(saved) : defaultItems;
+    if (!saved) {
+      items = defaultItems;
+      localStorage.setItem('lightSunItems', JSON.stringify(defaultItems));
+    } else {
+      items = JSON.parse(saved);
+      if (!Array.isArray(items) || items.length === 0) {
+        items = defaultItems;
+        localStorage.setItem('lightSunItems', JSON.stringify(defaultItems));
+      }
+    }
   } catch(e) {
     items = defaultItems;
   }
 
   function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(screenId).classList.add('active');
+    const target = document.getElementById(screenId);
+    if(target) target.classList.add('active');
   }
 
   function switchNav(element, screenId) {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    element.classList.add('active');
+    if(element) element.classList.add('active');
     showScreen(screenId);
   }
 
@@ -688,19 +698,4 @@
         });
         localStorage.setItem('lightSunItems', JSON.stringify(items));
         renderGrids();
-        document.getElementById('publish-form').reset();
-        showScreen('profile-screen');
-      }
-    }, 1200);
-  }
-
-  function editItem(id) {
-    const item = items.find(i => i.id === id);
-    if(item) {
-      alert(`Edit item: ${item.title}`);
-    }
-  }
-
-  function addComment() {
-    const input = document.getElementById('new-comment');
-  
+       
