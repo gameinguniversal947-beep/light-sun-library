@@ -180,7 +180,7 @@
       margin-bottom: 20px;
     }
 
-    /* YouTube Style Bottom Navigation Bar */
+    /* YouTube Style 4-Option Bottom Navigation Bar */
     .nav-bar {
       position: fixed;
       bottom: 0;
@@ -202,20 +202,20 @@
       justify-content: center;
       color: var(--text-dim);
       cursor: pointer;
-      width: 50%;
+      width: 25%;
       height: 100%;
       transition: color 0.2s ease;
     }
 
     .nav-item svg {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       fill: currentColor;
       margin-bottom: 3px;
     }
 
     .nav-item span {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 500;
     }
 
@@ -334,6 +334,22 @@
     </div>
   </div>
 
+  <!-- EXPLORE SCREEN -->
+  <div id="explore-screen" class="screen">
+    <h3 style="margin-top: 5px;">Trending Library</h3>
+    <p style="color:var(--text-dim); font-size:13px;">Discover popular books and comics here.</p>
+    <div class="grid" id="explore-grid"></div>
+  </div>
+
+  <!-- SUBSCRIPTIONS SCREEN -->
+  <div id="subscriptions-screen" class="screen">
+    <h3 style="margin-top: 5px;">Subscriptions</h3>
+    <p style="color:var(--text-dim); font-size:13px;">Updates from your favorite creators and publishers.</p>
+    <div style="background:var(--card-bg); padding:15px; border-radius:8px; margin-top:15px; text-align:center; color:var(--text-dim);">
+      No active subscriptions yet.
+    </div>
+  </div>
+
   <!-- BOOK DETAIL SCREEN -->
   <div id="detail-screen" class="screen">
     <button onclick="showScreen('home-screen')" style="background:none; border:none; color:#fff; cursor:pointer; font-size:16px;">← Back</button>
@@ -437,15 +453,27 @@
     </form>
   </div>
 
-  <!-- YOUTUBE STYLE BOTTOM NAVIGATION (2 OPTIONS: HOME & PROFILE) -->
+  <!-- YOUTUBE STYLE BOTTOM NAVIGATION (4 OPTIONS WITH ICON + LABEL) -->
   <div class="nav-bar">
-    <!-- Home Option with SVG Icon -->
+    <!-- 1. Home -->
     <div class="nav-item active" onclick="switchNav(this, 'home-screen')">
       <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
       <span>Home</span>
     </div>
 
-    <!-- Profile Option with SVG Icon -->
+    <!-- 2. Explore -->
+    <div class="nav-item" onclick="switchNav(this, 'explore-screen')">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+      <span>Explore</span>
+    </div>
+
+    <!-- 3. Subscriptions -->
+    <div class="nav-item" onclick="switchNav(this, 'subscriptions-screen')">
+      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 11.5l-5-3V7.5h1.5v3.8l4 2.4-1 1.8z"/></svg>
+      <span>Subscriptions</span>
+    </div>
+
+    <!-- 4. Profile -->
     <div class="nav-item" onclick="switchNav(this, 'profile-screen')">
       <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
       <span>Profile</span>
@@ -474,8 +502,11 @@
 
   function renderGrid() {
     const homeGrid = document.getElementById('books-grid');
+    const exploreGrid = document.getElementById('explore-grid');
     const myGrid = document.getElementById('my-books-grid');
+    
     homeGrid.innerHTML = '';
+    exploreGrid.innerHTML = '';
     myGrid.innerHTML = '';
 
     items.forEach(item => {
@@ -504,6 +535,7 @@
       `;
 
       homeGrid.innerHTML += cardHTML;
+      exploreGrid.innerHTML += cardHTML;
       myGrid.innerHTML += myCardHTML;
     });
   }
