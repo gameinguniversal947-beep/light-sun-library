@@ -47,7 +47,7 @@
     }
 
     .app-title {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: bold;
       color: var(--accent);
       white-space: nowrap;
@@ -60,7 +60,7 @@
       border: 1px solid #333;
       border-radius: 20px;
       overflow: hidden;
-      padding: 4px 10px;
+      padding: 5px 12px;
     }
 
     .search-bar-container input {
@@ -197,7 +197,7 @@
       margin-bottom: 20px;
     }
 
-    /* Bottom Navigation Bar (Sketch Style: Home, Search, Library, Profile) */
+    /* Bottom Navigation Bar (Home, C, Save, Profile) */
     .nav-bar {
       position: fixed;
       bottom: 0;
@@ -336,15 +336,15 @@
 
 <div class="app-container">
 
-  <!-- HEADER WITH SEARCH -->
+  <!-- HEADER WITH SEARCH BAR -->
   <div class="header">
     <div class="app-title">☀️ Light Sun</div>
     <div class="search-bar-container">
-      <input type="text" placeholder="Search books, comics..." oninput="handleSearch(this.value)">
+      <input type="text" id="header-search" placeholder="Search books, comics..." oninput="handleGlobalSearch(this.value)">
     </div>
   </div>
 
-  <!-- HOME SCREEN -->
+  <!-- 1. HOME SCREEN -->
   <div id="home-screen" class="screen active">
     <h3 style="margin-top: 5px;">Explore Content</h3>
     <div class="grid" id="books-grid"></div>
@@ -354,22 +354,18 @@
     </div>
   </div>
 
-  <!-- SEARCH / DISCOVER SCREEN -->
-  <div id="search-screen" class="screen">
-    <h3 style="margin-top: 5px;">Search & Discover</h3>
-    <div class="form-group">
-      <input type="text" placeholder="Type to search..." oninput="handleSearch(this.value)">
-    </div>
-    <div class="grid" id="search-grid"></div>
+  <!-- 2. C (COMICS) SCREEN -->
+  <div id="comics-screen" class="screen">
+    <h3 style="margin-top: 5px;">Comics Section (C)</h3>
+    <p style="color:var(--text-dim); font-size:13px;">Vertical-scroll comics and visual stories.</p>
+    <div class="grid" id="comics-grid"></div>
   </div>
 
-  <!-- LIBRARY / BOOKMARKS SCREEN -->
-  <div id="library-screen" class="screen">
-    <h3 style="margin-top: 5px;">My Library & Saved</h3>
-    <p style="color:var(--text-dim); font-size:13px;">Your bookmarks and downloaded reading materials.</p>
-    <div style="background:var(--card-bg); padding:15px; border-radius:8px; margin-top:15px; text-align:center; color:var(--text-dim);">
-      No items saved in library yet.
-    </div>
+  <!-- 3. SAVE / LIBRARY SCREEN -->
+  <div id="save-screen" class="screen">
+    <h3 style="margin-top: 5px;">Saved Items (Library)</h3>
+    <p style="color:var(--text-dim); font-size:13px;">Books and comics you saved to read later.</p>
+    <div class="grid" id="saved-grid"></div>
   </div>
 
   <!-- BOOK DETAIL SCREEN -->
@@ -410,7 +406,7 @@
     </div>
   </div>
 
-  <!-- PROFILE & CREATE SCREEN -->
+  <!-- 4. PROFILE SCREEN -->
   <div id="profile-screen" class="screen">
     <h2 style="margin-top:5px;">Publisher Profile</h2>
     
@@ -475,7 +471,7 @@
     </form>
   </div>
 
-  <!-- SKETCH STYLE BOTTOM NAVIGATION (4 OPTIONS: Home, Search, Library, Profile) -->
+  <!-- BOTTOM NAVIGATION (Home, C, Save, Profile) -->
   <div class="nav-bar">
     <!-- 1. Home -->
     <div class="nav-item active" onclick="switchNav(this, 'home-screen')">
@@ -483,16 +479,16 @@
       <span>Home</span>
     </div>
 
-    <!-- 2. Search -->
-    <div class="nav-item" onclick="switchNav(this, 'search-screen')">
-      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-      <span>Search</span>
+    <!-- 2. C (Comics) -->
+    <div class="nav-item" onclick="switchNav(this, 'comics-screen')">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+      <span>C</span>
     </div>
 
-    <!-- 3. Library -->
-    <div class="nav-item" onclick="switchNav(this, 'library-screen')">
-      <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
-      <span>Library</span>
+    <!-- 3. Save -->
+    <div class="nav-item" onclick="switchNav(this, 'save-screen')">
+      <svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z"/></svg>
+      <span>Save</span>
     </div>
 
     <!-- 4. Profile -->
@@ -522,16 +518,20 @@
     showScreen(screenId);
   }
 
-  function renderGrid() {
+  function renderGrids(filterText = '') {
     const homeGrid = document.getElementById('books-grid');
-    const searchGrid = document.getElementById('search-grid');
+    const comicsGrid = document.getElementById('comics-grid');
+    const savedGrid = document.getElementById('saved-grid');
     const myGrid = document.getElementById('my-books-grid');
     
     homeGrid.innerHTML = '';
-    searchGrid.innerHTML = '';
+    comicsGrid.innerHTML = '';
+    savedGrid.innerHTML = '';
     myGrid.innerHTML = '';
 
-    items.forEach(item => {
+    const filteredItems = items.filter(item => item.title.toLowerCase().includes(filterText.toLowerCase()));
+
+    filteredItems.forEach(item => {
       let finalPrice = isVIP && item.price > 0 ? Math.round(item.price * 0.7) : item.price;
       let priceTag = item.price === 0 ? "FREE" : `₹${finalPrice} ${isVIP ? '(VIP 30% OFF)' : ''}`;
 
@@ -557,14 +557,18 @@
       `;
 
       homeGrid.innerHTML += cardHTML;
-      searchGrid.innerHTML += cardHTML;
+      
+      if(item.type === 'comic') {
+        comicsGrid.innerHTML += cardHTML;
+      }
+      
+      savedGrid.innerHTML += cardHTML;
       myGrid.innerHTML += myCardHTML;
     });
   }
 
-  function handleSearch(query) {
-    // Basic search filtering logic placeholder
-    console.log("Searching:", query);
+  function handleGlobalSearch(query) {
+    renderGrids(query);
   }
 
   function openDetail(id) {
@@ -605,7 +609,7 @@
     document.querySelectorAll('.ads-banner').forEach(ad => {
       ad.style.display = isVIP ? 'none' : 'block';
     });
-    renderGrid();
+    renderGrids();
   }
 
   function handlePublish(event) {
@@ -630,7 +634,7 @@
         video: type === 'comic' ? '' : embedVideo
       });
 
-      renderGrid();
+      renderGrids();
       document.getElementById('publish-form').reset();
       showScreen('profile-screen');
     }, 1200);
@@ -657,9 +661,9 @@
     alert(`Opening Chapter ${num}...`);
   }
 
-  renderGrid();
+  renderGrids();
 </script>
 
 </body>
-      </html>
-      
+</html>
+  
