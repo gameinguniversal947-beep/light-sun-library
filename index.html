@@ -101,7 +101,7 @@
 
     .card img {
       width: 100%;
-      height: 170px;
+      height: 150px;
       object-fit: cover;
     }
 
@@ -188,13 +188,17 @@
       font-size: 15px;
     }
 
-    /* VIP Badge */
-    .vip-card {
+    /* VIP Badge & Auth Card */
+    .vip-card, .auth-card {
       background: linear-gradient(135deg, #ff9800, #e91e63);
       padding: 15px;
       border-radius: 12px;
       color: #fff;
       margin-bottom: 20px;
+    }
+
+    .auth-card {
+      background: linear-gradient(135deg, #2196F3, #9C27B0);
     }
 
     /* Bottom Navigation Bar (Home, C, Save, Profile) */
@@ -410,6 +414,15 @@
   <div id="profile-screen" class="screen">
     <h2 style="margin-top:5px;">Publisher Profile</h2>
     
+    <!-- Sign In / Sign Up Section Added Separately -->
+    <div class="auth-card">
+      <h3 style="margin:0;" id="auth-status">Account: Guest</h3>
+      <p style="font-size:12px; margin:5px 0 10px 0;">Sign in to sync your library & earnings.</p>
+      <button onclick="toggleAuth()" style="padding:6px 12px; background:#fff; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">
+        Sign In / Sign Up
+      </button>
+    </div>
+
     <div class="vip-card">
       <h3 style="margin:0;">VIP 1 Status: <span id="vip-status">Inactive</span></h3>
       <p style="font-size:12px; margin:5px 0 10px 0;">Ad-Free Experience + 30% OFF on Paid Books!</p>
@@ -458,13 +471,13 @@
       </div>
 
       <div class="form-group">
-        <label>Image Input (Cover / Pages)</label>
+        <label>Thumbnail Image (Cover Thumbnail)</label>
         <input type="file" id="pub-image" accept="image/*" required>
       </div>
 
       <div class="form-group">
-        <label>File Input (PDF / Book Document)</label>
-        <input type="file" id="pub-file" accept=".pdf,.epub" required>
+        <label>File Input (PDF / Book Document / Comic File)</label>
+        <input type="file" id="pub-file" accept=".pdf,.epub,.cbz" required>
       </div>
 
       <button type="submit" class="btn">Scan & Publish</button>
@@ -502,10 +515,15 @@
 
 <script>
   let isVIP = false;
-  let items = [
+  let isLoggedIn = false;
+
+  // LocalStorage check for persistent items
+  let defaultItems = [
     { id: 1, type: 'book', title: 'Solar Adventure', price: 200, image: 'https://via.placeholder.com/150', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
     { id: 2, type: 'comic', title: 'Shadow Hunter Comic', price: 0, image: 'https://via.placeholder.com/150', video: '' }
   ];
+
+  let items = JSON.parse(localStorage.getItem('lightSunItems')) || defaultItems;
 
   function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -612,12 +630,18 @@
     renderGrids();
   }
 
+  function toggleAuth() {
+    isLoggedIn = !isLoggedIn;
+    document.getElementById('auth-status').innerText = isLoggedIn ? "Account: Vashu Dev (Signed In)" : "Account: Guest";
+  }
+
   function handlePublish(event) {
     event.preventDefault();
     const type = document.getElementById('pub-type').value;
     const title = document.getElementById('pub-title').value;
     const price = parseInt(document.getElementById('pub-price').value);
     const video = document.getElementById('pub-video').value;
+    const imageInput = document.getElementById('pub-image');
 
     alert("Scanning files for adult content...");
 
@@ -625,18 +649,45 @@
       alert("Adult Content Check Passed! Published Successfully.");
       let embedVideo = (type === 'book' && video.includes("watch?v=")) ? video.replace("watch?v=", "embed/") : video;
 
-      items.push({
-        id: Date.now(),
-        type: type,
-        title: title,
-        price: price,
-        image: "https://via.placeholder.com/150",
-        video: type === 'comic' ? '' : embedVideo
-      });
+      // Read selected image file as thumbnail URL
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imageUrl = e.target.result;
 
-      renderGrids();
-      document.getElementById('publish-form').reset();
-      showScreen('profile-screen');
+        items.push({
+          id: Date.now(),
+          type: type,
+          title: title,
+          price: price,
+          image: imageUrl,
+          video: type === 'comic' ? '' : embedVideo
+        });
+
+        // Save permanently to localStorage so it never disappears on refresh
+        localStorage.setItem('lightSunItems', JSON.stringify(items));
+
+        renderGrids();
+        document.getElementById('publish-form').reset();
+        showScreen('profile-screen');
+      };
+
+      if (imageInput.files && imageInput.files[0]) {
+        reader.readAsDataURL(imageInput.files[0]);
+      } else {
+        // Fallback if no image picked
+        items.push({
+          id: Date.now(),
+          type: type,
+          title: title,
+          price: price,
+          image: 'https://via.placeholder.com/150',
+          video: type === 'comic' ? '' : embedVideo
+        });
+        localStorage.setItem('lightSunItems', JSON.stringify(items));
+        renderGrids();
+        document.getElementById('publish-form').reset();
+        showScreen('profile-screen');
+      }
     }, 1200);
   }
 
@@ -648,22 +699,4 @@
   }
 
   function addComment() {
-    const input = document.getElementById('new-comment');
-    const list = document.getElementById('comments-list');
-    if(input.value.trim() !== '') {
-      list.innerHTML += `<div class="comment-item"><strong>You:</strong> ${input.value}</div>`;
-      input.value = '';
-      list.scrollTop = list.scrollHeight;
-    }
-  }
-
-  function readChapter(num) {
-    alert(`Opening Chapter ${num}...`);
-  }
-
-  renderGrids();
-</script>
-
-</body>
-</html>
-  
+    const input =
