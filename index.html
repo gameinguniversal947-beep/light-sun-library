@@ -32,13 +32,13 @@
       box-shadow: 0 0 15px rgba(0,0,0,0.5);
     }
 
-    /* Header */
+    /* Header with Search Bar */
     .header {
-      padding: 12px 16px;
+      padding: 10px 14px;
       background-color: rgba(15, 15, 15, 0.95);
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 10px;
       position: sticky;
       top: 0;
       z-index: 10;
@@ -47,12 +47,29 @@
     }
 
     .app-title {
-      font-size: 18px;
+      font-size: 15px;
       font-weight: bold;
       color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .search-bar-container {
+      flex: 1;
       display: flex;
-      align-items: center;
-      gap: 8px;
+      background: #222;
+      border: 1px solid #333;
+      border-radius: 20px;
+      overflow: hidden;
+      padding: 4px 10px;
+    }
+
+    .search-bar-container input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
     }
 
     /* Screen Views */
@@ -180,7 +197,7 @@
       margin-bottom: 20px;
     }
 
-    /* YouTube Style 4-Option Bottom Navigation Bar */
+    /* Bottom Navigation Bar (Sketch Style: Home, Search, Library, Profile) */
     .nav-bar {
       position: fixed;
       bottom: 0;
@@ -319,9 +336,12 @@
 
 <div class="app-container">
 
-  <!-- HEADER -->
+  <!-- HEADER WITH SEARCH -->
   <div class="header">
-    <div class="app-title">☀️ Light Sun Library</div>
+    <div class="app-title">☀️ Light Sun</div>
+    <div class="search-bar-container">
+      <input type="text" placeholder="Search books, comics..." oninput="handleSearch(this.value)">
+    </div>
   </div>
 
   <!-- HOME SCREEN -->
@@ -334,19 +354,21 @@
     </div>
   </div>
 
-  <!-- EXPLORE SCREEN -->
-  <div id="explore-screen" class="screen">
-    <h3 style="margin-top: 5px;">Trending Library</h3>
-    <p style="color:var(--text-dim); font-size:13px;">Discover popular books and comics here.</p>
-    <div class="grid" id="explore-grid"></div>
+  <!-- SEARCH / DISCOVER SCREEN -->
+  <div id="search-screen" class="screen">
+    <h3 style="margin-top: 5px;">Search & Discover</h3>
+    <div class="form-group">
+      <input type="text" placeholder="Type to search..." oninput="handleSearch(this.value)">
+    </div>
+    <div class="grid" id="search-grid"></div>
   </div>
 
-  <!-- SUBSCRIPTIONS SCREEN -->
-  <div id="subscriptions-screen" class="screen">
-    <h3 style="margin-top: 5px;">Subscriptions</h3>
-    <p style="color:var(--text-dim); font-size:13px;">Updates from your favorite creators and publishers.</p>
+  <!-- LIBRARY / BOOKMARKS SCREEN -->
+  <div id="library-screen" class="screen">
+    <h3 style="margin-top: 5px;">My Library & Saved</h3>
+    <p style="color:var(--text-dim); font-size:13px;">Your bookmarks and downloaded reading materials.</p>
     <div style="background:var(--card-bg); padding:15px; border-radius:8px; margin-top:15px; text-align:center; color:var(--text-dim);">
-      No active subscriptions yet.
+      No items saved in library yet.
     </div>
   </div>
 
@@ -453,7 +475,7 @@
     </form>
   </div>
 
-  <!-- YOUTUBE STYLE BOTTOM NAVIGATION (4 OPTIONS WITH ICON + LABEL) -->
+  <!-- SKETCH STYLE BOTTOM NAVIGATION (4 OPTIONS: Home, Search, Library, Profile) -->
   <div class="nav-bar">
     <!-- 1. Home -->
     <div class="nav-item active" onclick="switchNav(this, 'home-screen')">
@@ -461,16 +483,16 @@
       <span>Home</span>
     </div>
 
-    <!-- 2. Explore -->
-    <div class="nav-item" onclick="switchNav(this, 'explore-screen')">
-      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-      <span>Explore</span>
+    <!-- 2. Search -->
+    <div class="nav-item" onclick="switchNav(this, 'search-screen')">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      <span>Search</span>
     </div>
 
-    <!-- 3. Subscriptions -->
-    <div class="nav-item" onclick="switchNav(this, 'subscriptions-screen')">
-      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 11.5l-5-3V7.5h1.5v3.8l4 2.4-1 1.8z"/></svg>
-      <span>Subscriptions</span>
+    <!-- 3. Library -->
+    <div class="nav-item" onclick="switchNav(this, 'library-screen')">
+      <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+      <span>Library</span>
     </div>
 
     <!-- 4. Profile -->
@@ -502,11 +524,11 @@
 
   function renderGrid() {
     const homeGrid = document.getElementById('books-grid');
-    const exploreGrid = document.getElementById('explore-grid');
+    const searchGrid = document.getElementById('search-grid');
     const myGrid = document.getElementById('my-books-grid');
     
     homeGrid.innerHTML = '';
-    exploreGrid.innerHTML = '';
+    searchGrid.innerHTML = '';
     myGrid.innerHTML = '';
 
     items.forEach(item => {
@@ -535,9 +557,14 @@
       `;
 
       homeGrid.innerHTML += cardHTML;
-      exploreGrid.innerHTML += cardHTML;
+      searchGrid.innerHTML += cardHTML;
       myGrid.innerHTML += myCardHTML;
     });
+  }
+
+  function handleSearch(query) {
+    // Basic search filtering logic placeholder
+    console.log("Searching:", query);
   }
 
   function openDetail(id) {
@@ -634,4 +661,5 @@
 </script>
 
 </body>
-</html>
+      </html>
+      
