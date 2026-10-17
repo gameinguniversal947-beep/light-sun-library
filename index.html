@@ -414,7 +414,7 @@
   <div id="profile-screen" class="screen">
     <h2 style="margin-top:5px;">Publisher Profile</h2>
     
-    <!-- Sign In / Sign Up Section Added Separately -->
+    <!-- Sign In / Sign Up Section -->
     <div class="auth-card">
       <h3 style="margin:0;" id="auth-status">Account: Guest</h3>
       <p style="font-size:12px; margin:5px 0 10px 0;">Sign in to sync your library & earnings.</p>
@@ -517,13 +517,18 @@
   let isVIP = false;
   let isLoggedIn = false;
 
-  // LocalStorage check for persistent items
   let defaultItems = [
     { id: 1, type: 'book', title: 'Solar Adventure', price: 200, image: 'https://via.placeholder.com/150', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
     { id: 2, type: 'comic', title: 'Shadow Hunter Comic', price: 0, image: 'https://via.placeholder.com/150', video: '' }
   ];
 
-  let items = JSON.parse(localStorage.getItem('lightSunItems')) || defaultItems;
+  let items = [];
+  try {
+    let saved = localStorage.getItem('lightSunItems');
+    items = saved ? JSON.parse(saved) : defaultItems;
+  } catch(e) {
+    items = defaultItems;
+  }
 
   function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -542,12 +547,14 @@
     const savedGrid = document.getElementById('saved-grid');
     const myGrid = document.getElementById('my-books-grid');
     
+    if(!homeGrid || !comicsGrid || !savedGrid || !myGrid) return;
+
     homeGrid.innerHTML = '';
     comicsGrid.innerHTML = '';
     savedGrid.innerHTML = '';
     myGrid.innerHTML = '';
 
-    const filteredItems = items.filter(item => item.title.toLowerCase().includes(filterText.toLowerCase()));
+    const filteredItems = items.filter(item => item && item.title && item.title.toLowerCase().includes(filterText.toLowerCase()));
 
     filteredItems.forEach(item => {
       let finalPrice = isVIP && item.price > 0 ? Math.round(item.price * 0.7) : item.price;
@@ -649,7 +656,6 @@
       alert("Adult Content Check Passed! Published Successfully.");
       let embedVideo = (type === 'book' && video.includes("watch?v=")) ? video.replace("watch?v=", "embed/") : video;
 
-      // Read selected image file as thumbnail URL
       const reader = new FileReader();
       reader.onload = function(e) {
         const imageUrl = e.target.result;
@@ -663,9 +669,7 @@
           video: type === 'comic' ? '' : embedVideo
         });
 
-        // Save permanently to localStorage so it never disappears on refresh
         localStorage.setItem('lightSunItems', JSON.stringify(items));
-
         renderGrids();
         document.getElementById('publish-form').reset();
         showScreen('profile-screen');
@@ -674,7 +678,6 @@
       if (imageInput.files && imageInput.files[0]) {
         reader.readAsDataURL(imageInput.files[0]);
       } else {
-        // Fallback if no image picked
         items.push({
           id: Date.now(),
           type: type,
@@ -699,4 +702,5 @@
   }
 
   function addComment() {
-    const input =
+    const input = document.getElementById('new-comment');
+  
