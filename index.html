@@ -15,7 +15,7 @@
 
     body {
       margin: 0;
-      font-family: 'Roboto', Arial, sans-serif;
+      font-family: Arial, sans-serif;
       background-color: var(--bg-color);
       color: var(--text);
       display: flex;
@@ -32,10 +32,10 @@
       box-shadow: 0 0 15px rgba(0,0,0,0.5);
     }
 
-    /* Header with Search Bar */
+    /* Header */
     .header {
       padding: 10px 14px;
-      background-color: rgba(15, 15, 15, 0.95);
+      background-color: #151515;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -43,7 +43,6 @@
       top: 0;
       z-index: 10;
       border-bottom: 1px solid #272727;
-      backdrop-filter: blur(5px);
     }
 
     .app-title {
@@ -72,7 +71,7 @@
       outline: none;
     }
 
-    /* Screen Views */
+    /* Screens */
     .screen {
       display: none;
       padding: 15px;
@@ -82,126 +81,7 @@
       display: block;
     }
 
-    /* Grid layout */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-top: 15px;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border-radius: 10px;
-      overflow: hidden;
-      cursor: pointer;
-      position: relative;
-      border: 1px solid #272727;
-    }
-
-    .card img {
-      width: 100%;
-      height: 150px;
-      object-fit: cover;
-    }
-
-    .card-info {
-      padding: 10px;
-    }
-
-    .card-title {
-      font-size: 13px;
-      font-weight: 600;
-      margin: 0 0 4px 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .card-price {
-      color: var(--accent);
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    .edit-pencil {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(0, 0, 0, 0.75);
-      color: #fff;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 14px;
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-
-    /* Ads Section */
-    .ads-banner {
-      background: #1c1c1c;
-      color: #717171;
-      text-align: center;
-      padding: 12px;
-      margin: 15px 0;
-      border: 1px dashed #3e3e3e;
-      border-radius: 8px;
-      font-size: 12px;
-    }
-
-    /* Form Styles */
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 13px;
-      color: var(--text-dim);
-    }
-
-    .form-group input, .form-group select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #333;
-      background: #222;
-      color: #fff;
-      box-sizing: border-box;
-      font-size: 14px;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 12px;
-      background: var(--accent);
-      border: none;
-      border-radius: 6px;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 15px;
-    }
-
-    /* VIP Badge & Auth Card */
-    .vip-card, .auth-card {
-      background: linear-gradient(135deg, #ff9800, #e91e63);
-      padding: 15px;
-      border-radius: 12px;
-      color: #fff;
-      margin-bottom: 20px;
-    }
-
-    .auth-card {
-      background: linear-gradient(135deg, #2196F3, #9C27B0);
-    }
-
-    /* Bottom Navigation Bar (Home, C, Save, Profile) */
+    /* Bottom Navigation */
     .nav-bar {
       position: fixed;
       bottom: 0;
@@ -225,7 +105,6 @@
       cursor: pointer;
       width: 25%;
       height: 100%;
-      transition: color 0.2s ease;
     }
 
     .nav-item svg {
@@ -237,7 +116,6 @@
 
     .nav-item span {
       font-size: 10px;
-      font-weight: 500;
     }
 
     .nav-item.active {
@@ -247,264 +125,58 @@
     .nav-item.active svg {
       fill: var(--accent);
     }
-
-    /* Create Button (+) */
-    .create-btn-container {
-      text-align: center;
-      margin-top: 25px;
-      margin-bottom: 15px;
-    }
-
-    .create-circle-btn {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      border: 2px solid var(--accent);
-      background: #181818;
-      color: var(--accent);
-      font-size: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    }
-
-    .create-label {
-      color: var(--accent);
-      font-size: 12px;
-      margin-top: 6px;
-      font-weight: 600;
-    }
-
-    /* Comments Section */
-    .comment-section {
-      margin-top: 20px;
-      background: #181818;
-      padding: 12px;
-      border-radius: 8px;
-    }
-
-    .comment-box {
-      max-height: 180px;
-      overflow-y: auto;
-      margin-bottom: 10px;
-    }
-
-    .comment-item {
-      font-size: 13px;
-      padding: 6px 0;
-      border-bottom: 1px solid #2a2a2a;
-    }
-
-    .comment-input-group {
-      display: flex;
-      gap: 6px;
-    }
-
-    .comment-input-group input {
-      flex: 1;
-      padding: 8px;
-      background: #2a2a2a;
-      border: 1px solid #444;
-      color: #fff;
-      border-radius: 4px;
-    }
-
-    /* Chapters List */
-    .chapter-list {
-      margin-top: 15px;
-    }
-
-    .chapter-item {
-      background: #222;
-      padding: 12px;
-      margin-bottom: 8px;
-      border-radius: 6px;
-      display: flex;
-      justify-content: space-between;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    iframe {
-      width: 100%;
-      height: 200px;
-      border: none;
-      border-radius: 8px;
-    }
   </style>
 </head>
 <body>
 
 <div class="app-container">
 
-  <!-- HEADER WITH SEARCH BAR -->
+  <!-- HEADER -->
   <div class="header">
     <div class="app-title">☀️ Light Sun</div>
     <div class="search-bar-container">
-      <input type="text" id="header-search" placeholder="Search books, comics..." oninput="handleGlobalSearch(this.value)">
+      <input type="text" placeholder="Search books, comics...">
     </div>
   </div>
 
-  <!-- 1. HOME SCREEN -->
+  <!-- HOME SCREEN -->
   <div id="home-screen" class="screen active">
-    <h3 style="margin-top: 5px;">Explore Content</h3>
-    <div class="grid" id="books-grid"></div>
-
-    <div class="ads-banner">
-      📢 Banner Ad (VIP 1 User ke liye Hide rahega)
-    </div>
+    <h3>Home Screen</h3>
+    <p style="color:#aaa;">Yahan books dikhengi.</p>
   </div>
 
-  <!-- 2. C (COMICS) SCREEN -->
+  <!-- COMICS SCREEN -->
   <div id="comics-screen" class="screen">
-    <h3 style="margin-top: 5px;">Comics Section (C)</h3>
-    <p style="color:var(--text-dim); font-size:13px;">Vertical-scroll comics and visual stories.</p>
-    <div class="grid" id="comics-grid"></div>
+    <h3>Comics Section (C)</h3>
+    <p style="color:#aaa;">Yahan comics dikhengi.</p>
   </div>
 
-  <!-- 3. SAVE / LIBRARY SCREEN -->
+  <!-- SAVE SCREEN -->
   <div id="save-screen" class="screen">
-    <h3 style="margin-top: 5px;">Saved Items (Library)</h3>
-    <p style="color:var(--text-dim); font-size:13px;">Books and comics you saved to read later.</p>
-    <div class="grid" id="saved-grid"></div>
+    <h3>Saved Items</h3>
+    <p style="color:#aaa;">Yahan save ki hui files dikhengi.</p>
   </div>
 
-  <!-- BOOK DETAIL SCREEN -->
-  <div id="detail-screen" class="screen">
-    <button onclick="showScreen('home-screen')" style="background:none; border:none; color:#fff; cursor:pointer; font-size:16px;">← Back</button>
-    <h2 id="detail-title" style="margin-bottom:5px;">Title</h2>
-    <p id="detail-price" style="color:var(--accent); font-weight:bold; margin-top:0;"></p>
-
-    <!-- Video Link Section (Only for Books) -->
-    <div id="video-section" style="display:none; margin-bottom: 15px;">
-      <h4>Author Video Link</h4>
-      <div id="video-embed"></div>
-    </div>
-
-    <div class="ads-banner">
-      📢 Reader Banner Ad
-    </div>
-
-    <!-- Chapter List -->
-    <div class="chapter-list">
-      <h4>Chapters</h4>
-      <div class="chapter-item" onclick="readChapter(1)"><span>1 Name</span> <span>📖</span></div>
-      <div class="chapter-item" onclick="readChapter(2)"><span>2 Name</span> <span>📖</span></div>
-      <div class="chapter-item" onclick="readChapter(3)"><span>3 Name</span> <span>📖</span></div>
-    </div>
-
-    <!-- YouTube/Shorts Style Comment Section -->
-    <div class="comment-section">
-      <h4>Comments</h4>
-      <div class="comment-box" id="comments-list">
-        <div class="comment-item"><strong>User12:</strong> Awesome read!</div>
-        <div class="comment-item"><strong>ReaderX:</strong> Next chapter kab aayega?</div>
-      </div>
-      <div class="comment-input-group">
-        <input type="text" id="new-comment" placeholder="Add a comment...">
-        <button onclick="addComment()" style="padding:8px 14px; background:var(--accent); border:none; border-radius:4px; font-weight:bold; cursor:pointer;">Send</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 4. PROFILE SCREEN -->
+  <!-- PROFILE SCREEN -->
   <div id="profile-screen" class="screen">
-    <h2 style="margin-top:5px;">Publisher Profile</h2>
-    
-    <!-- Sign In / Sign Up Section -->
-    <div class="auth-card">
-      <h3 style="margin:0;" id="auth-status">Account: Guest</h3>
-      <p style="font-size:12px; margin:5px 0 10px 0;">Sign in to sync your library & earnings.</p>
-      <button onclick="toggleAuth()" style="padding:6px 12px; background:#fff; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">
-        Sign In / Sign Up
-      </button>
-    </div>
-
-    <div class="vip-card">
-      <h3 style="margin:0;">VIP 1 Status: <span id="vip-status">Inactive</span></h3>
-      <p style="font-size:12px; margin:5px 0 10px 0;">Ad-Free Experience + 30% OFF on Paid Books!</p>
-      <button onclick="toggleVIP()" style="padding:6px 12px; background:#fff; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">
-        Toggle VIP 1
-      </button>
-    </div>
-
-    <h3>Your Published Content</h3>
-    <div class="grid" id="my-books-grid"></div>
-
-    <!-- (+) Create Button -->
-    <div class="create-btn-container">
-      <div class="create-circle-btn" onclick="showScreen('create-screen')">+</div>
-      <div class="create-label">create</div>
-    </div>
+    <h3>Profile & Publisher</h3>
+    <p style="color:#aaa;">Yahan profile aur create button hoga.</p>
   </div>
 
-  <!-- CREATE / PUBLISH SCREEN -->
-  <div id="create-screen" class="screen">
-    <button onclick="showScreen('profile-screen')" style="background:none; border:none; color:#fff; cursor:pointer; font-size:16px;">← Cancel</button>
-    <h2 id="create-form-title">Publish New Content</h2>
-
-    <form id="publish-form" onsubmit="handlePublish(event)">
-      <div class="form-group">
-        <label>Type</label>
-        <select id="pub-type" onchange="toggleVideoInput()">
-          <option value="book">Book</option>
-          <option value="comic">Comic</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Title</label>
-        <input type="text" id="pub-title" required placeholder="Enter Title">
-      </div>
-
-      <div class="form-group">
-        <label>Price (Max ₹1000)</label>
-        <input type="number" id="pub-price" min="0" max="1000" required placeholder="Enter Price">
-      </div>
-
-      <div class="form-group" id="video-input-group">
-        <label>YouTube Video Link (Optional for Books)</label>
-        <input type="url" id="pub-video" placeholder="https://www.youtube.com/watch?v=...">
-      </div>
-
-      <div class="form-group">
-        <label>Thumbnail Image (Cover Thumbnail)</label>
-        <input type="file" id="pub-image" accept="image/*" required>
-      </div>
-
-      <div class="form-group">
-        <label>File Input (PDF / Book Document / Comic File)</label>
-        <input type="file" id="pub-file" accept=".pdf,.epub,.cbz" required>
-      </div>
-
-      <button type="submit" class="btn">Scan & Publish</button>
-    </form>
-  </div>
-
-  <!-- BOTTOM NAVIGATION (Home, C, Save, Profile) -->
+  <!-- BOTTOM NAVIGATION -->
   <div class="nav-bar">
-    <!-- 1. Home -->
     <div class="nav-item active" onclick="switchNav(this, 'home-screen')">
       <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
       <span>Home</span>
     </div>
-
-    <!-- 2. C (Comics) -->
     <div class="nav-item" onclick="switchNav(this, 'comics-screen')">
       <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
       <span>C</span>
     </div>
-
-    <!-- 3. Save -->
     <div class="nav-item" onclick="switchNav(this, 'save-screen')">
       <svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z"/></svg>
       <span>Save</span>
     </div>
-
-    <!-- 4. Profile -->
     <div class="nav-item" onclick="switchNav(this, 'profile-screen')">
       <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
       <span>Profile</span>
@@ -514,31 +186,6 @@
 </div>
 
 <script>
-  let isVIP = false;
-  let isLoggedIn = false;
-
-  let defaultItems = [
-    { id: 1, type: 'book', title: 'Solar Adventure', price: 200, image: 'https://via.placeholder.com/150', video: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
-    { id: 2, type: 'comic', title: 'Shadow Hunter Comic', price: 0, image: 'https://via.placeholder.com/150', video: '' }
-  ];
-
-  let items = [];
-  try {
-    let saved = localStorage.getItem('lightSunItems');
-    if (!saved) {
-      items = defaultItems;
-      localStorage.setItem('lightSunItems', JSON.stringify(defaultItems));
-    } else {
-      items = JSON.parse(saved);
-      if (!Array.isArray(items) || items.length === 0) {
-        items = defaultItems;
-        localStorage.setItem('lightSunItems', JSON.stringify(defaultItems));
-      }
-    }
-  } catch(e) {
-    items = defaultItems;
-  }
-
   function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const target = document.getElementById(screenId);
@@ -550,152 +197,7 @@
     if(element) element.classList.add('active');
     showScreen(screenId);
   }
+</script>
 
-  function renderGrids(filterText = '') {
-    const homeGrid = document.getElementById('books-grid');
-    const comicsGrid = document.getElementById('comics-grid');
-    const savedGrid = document.getElementById('saved-grid');
-    const myGrid = document.getElementById('my-books-grid');
-    
-    if(!homeGrid || !comicsGrid || !savedGrid || !myGrid) return;
-
-    homeGrid.innerHTML = '';
-    comicsGrid.innerHTML = '';
-    savedGrid.innerHTML = '';
-    myGrid.innerHTML = '';
-
-    const filteredItems = items.filter(item => item && item.title && item.title.toLowerCase().includes(filterText.toLowerCase()));
-
-    filteredItems.forEach(item => {
-      let finalPrice = isVIP && item.price > 0 ? Math.round(item.price * 0.7) : item.price;
-      let priceTag = item.price === 0 ? "FREE" : `₹${finalPrice} ${isVIP ? '(VIP 30% OFF)' : ''}`;
-
-      let cardHTML = `
-        <div class="card" onclick="openDetail(${item.id})">
-          <img src="${item.image}" alt="cover">
-          <div class="card-info">
-            <div class="card-title">${item.title} (${item.type.toUpperCase()})</div>
-            <div class="card-price">${priceTag}</div>
-          </div>
-        </div>
-      `;
-
-      let myCardHTML = `
-        <div class="card">
-          <div class="edit-pencil" onclick="editItem(${item.id})">✏️</div>
-          <img src="${item.image}" alt="cover" onclick="openDetail(${item.id})">
-          <div class="card-info" onclick="openDetail(${item.id})">
-            <div class="card-title">${item.title}</div>
-            <div class="card-price">${priceTag}</div>
-          </div>
-        </div>
-      `;
-
-      homeGrid.innerHTML += cardHTML;
-      
-      if(item.type === 'comic') {
-        comicsGrid.innerHTML += cardHTML;
-      }
-      
-      savedGrid.innerHTML += cardHTML;
-      myGrid.innerHTML += myCardHTML;
-    });
-  }
-
-  function handleGlobalSearch(query) {
-    renderGrids(query);
-  }
-
-  function openDetail(id) {
-    const item = items.find(i => i.id === id);
-    if(!item) return;
-
-    document.getElementById('detail-title').innerText = item.title;
-    let finalPrice = isVIP && item.price > 0 ? Math.round(item.price * 0.7) : item.price;
-    document.getElementById('detail-price').innerText = item.price === 0 ? "FREE" : `Price: ₹${finalPrice}`;
-
-    const videoSec = document.getElementById('video-section');
-    const videoEmbed = document.getElementById('video-embed');
-
-    if(item.type === 'book' && item.video && item.video.trim() !== '') {
-      videoSec.style.display = 'block';
-      videoEmbed.innerHTML = `<iframe src="${item.video}"></iframe>`;
-    } else {
-      videoSec.style.display = 'none';
-      videoEmbed.innerHTML = '';
-    }
-
-    showScreen('detail-screen');
-  }
-
-  function toggleVideoInput() {
-    const type = document.getElementById('pub-type').value;
-    const videoGroup = document.getElementById('video-input-group');
-    if(type === 'comic') {
-      videoGroup.style.display = 'none';
-    } else {
-      videoGroup.style.display = 'block';
-    }
-  }
-
-  function toggleVIP() {
-    isVIP = !isVIP;
-    document.getElementById('vip-status').innerText = isVIP ? "ACTIVE (No Ads + 30% OFF)" : "Inactive";
-    document.querySelectorAll('.ads-banner').forEach(ad => {
-      ad.style.display = isVIP ? 'none' : 'block';
-    });
-    renderGrids();
-  }
-
-  function toggleAuth() {
-    isLoggedIn = !isLoggedIn;
-    document.getElementById('auth-status').innerText = isLoggedIn ? "Account: Vashu Dev (Signed In)" : "Account: Guest";
-  }
-
-  function handlePublish(event) {
-    event.preventDefault();
-    const type = document.getElementById('pub-type').value;
-    const title = document.getElementById('pub-title').value;
-    const price = parseInt(document.getElementById('pub-price').value);
-    const video = document.getElementById('pub-video').value;
-    const imageInput = document.getElementById('pub-image');
-
-    alert("Scanning files for adult content...");
-
-    setTimeout(() => {
-      alert("Adult Content Check Passed! Published Successfully.");
-      let embedVideo = (type === 'book' && video.includes("watch?v=")) ? video.replace("watch?v=", "embed/") : video;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const imageUrl = e.target.result;
-
-        items.push({
-          id: Date.now(),
-          type: type,
-          title: title,
-          price: price,
-          image: imageUrl,
-          video: type === 'comic' ? '' : embedVideo
-        });
-
-        localStorage.setItem('lightSunItems', JSON.stringify(items));
-        renderGrids();
-        document.getElementById('publish-form').reset();
-        showScreen('profile-screen');
-      };
-
-      if (imageInput.files && imageInput.files[0]) {
-        reader.readAsDataURL(imageInput.files[0]);
-      } else {
-        items.push({
-          id: Date.now(),
-          type: type,
-          title: title,
-          price: price,
-          image: 'https://via.placeholder.com/150',
-          video: type === 'comic' ? '' : embedVideo
-        });
-        localStorage.setItem('lightSunItems', JSON.stringify(items));
-        renderGrids();
-       
+</body>
+</html>
