@@ -29,7 +29,7 @@
       background-color: var(--bg-color);
       position: relative;
       padding-bottom: 70px;
-      overflow-x: hidden;
+      box-sizing: border-box;
       box-shadow: 0 0 15px rgba(0,0,0,0.5);
     }
 
@@ -76,8 +76,6 @@
     .screen {
       display: none;
       padding: 15px;
-      box-sizing: border-box;
-      width: 100%;
     }
 
     .screen.active {
@@ -266,25 +264,25 @@
     </div>
   </div>
 
-  <!-- HOME SCREEN -->
+  <!-- 1. HOME SCREEN -->
   <div id="home-screen" class="screen active">
     <h3>Explore Content</h3>
     <div class="grid" id="books-grid"></div>
   </div>
 
-  <!-- COMICS SCREEN -->
+  <!-- 2. C (COMICS) SCREEN -->
   <div id="comics-screen" class="screen">
     <h3>Comics Section (C)</h3>
     <div class="grid" id="comics-grid"></div>
   </div>
 
-  <!-- SAVE SCREEN -->
+  <!-- 3. SAVE SCREEN -->
   <div id="save-screen" class="screen">
     <h3>Saved Items (Library)</h3>
     <div class="grid" id="saved-grid"></div>
   </div>
 
-  <!-- PROFILE SCREEN -->
+  <!-- 4. PROFILE SCREEN -->
   <div id="profile-screen" class="screen">
     <h3>Publisher Profile</h3>
     
