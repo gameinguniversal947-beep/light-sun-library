@@ -28,14 +28,14 @@
       min-height: 100vh;
       background-color: var(--bg-color);
       position: relative;
-      padding-bottom: 70px;
+      padding-bottom: 80px;
       box-sizing: border-box;
       box-shadow: 0 0 15px rgba(0,0,0,0.5);
     }
 
     /* Header */
     .header {
-      padding: 10px 14px;
+      padding: 12px 15px;
       background-color: #151515;
       display: flex;
       align-items: center;
@@ -60,7 +60,7 @@
       border: 1px solid #333;
       border-radius: 20px;
       overflow: hidden;
-      padding: 5px 12px;
+      padding: 6px 12px;
     }
 
     .search-bar-container input {
@@ -160,37 +160,36 @@
     }
 
     /* Auth & VIP Cards */
-    .auth-card {
-      background: linear-gradient(135deg, #2196F3, #9C27B0);
+    .auth-card, .vip-card {
       padding: 15px;
       border-radius: 12px;
       color: #fff;
       margin-bottom: 20px;
     }
 
+    .auth-card {
+      background: linear-gradient(135deg, #2196F3, #9C27B0);
+    }
+
     .vip-card {
       background: linear-gradient(135deg, #ff9800, #e91e63);
-      padding: 15px;
-      border-radius: 12px;
-      color: #fff;
-      margin-bottom: 20px;
     }
 
     /* Create Button (+) */
     .create-btn-container {
       text-align: center;
       margin-top: 25px;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
 
     .create-circle-btn {
-      width: 52px;
-      height: 52px;
+      width: 55px;
+      height: 55px;
       border-radius: 50%;
       border: 2px solid var(--accent);
       background: #181818;
       color: var(--accent);
-      font-size: 30px;
+      font-size: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -210,15 +209,17 @@
     .nav-bar {
       position: fixed;
       bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
       width: 100%;
       max-width: 420px;
-      height: 60px;
+      height: 65px;
       background: #0f0f0f;
       display: flex;
       justify-content: space-around;
       align-items: center;
       border-top: 1px solid #272727;
-      z-index: 100;
+      z-index: 1000;
     }
 
     .nav-item {
@@ -270,7 +271,7 @@
     <div class="grid" id="books-grid"></div>
   </div>
 
-  <!-- 2. C (COMICS) SCREEN -->
+  <!-- 2. COMICS SCREEN -->
   <div id="comics-screen" class="screen">
     <h3>Comics Section (C)</h3>
     <div class="grid" id="comics-grid"></div>
@@ -286,7 +287,6 @@
   <div id="profile-screen" class="screen">
     <h3>Publisher Profile</h3>
     
-    <!-- Sign In / Sign Up Card -->
     <div class="auth-card">
       <h4 style="margin:0;" id="auth-status">Account: Guest</h4>
       <p style="font-size:12px; margin:5px 0 10px 0;">Sign in to sync your library & earnings.</p>
@@ -295,7 +295,6 @@
       </button>
     </div>
 
-    <!-- VIP Card -->
     <div class="vip-card">
       <h4 style="margin:0;">VIP 1 Status: <span id="vip-status">Inactive</span></h4>
       <p style="font-size:12px; margin:5px 0 10px 0;">Ad-Free Experience + 30% OFF on Paid Books!</p>
@@ -307,7 +306,6 @@
     <h3>Your Published Content</h3>
     <div class="grid" id="my-books-grid"></div>
 
-    <!-- (+) Create Button -->
     <div class="create-btn-container">
       <div class="create-circle-btn" onclick="showScreen('create-screen')">+</div>
       <div class="create-label">create</div>
@@ -316,7 +314,7 @@
 
   <!-- CREATE / PUBLISH SCREEN -->
   <div id="create-screen" class="screen">
-    <button onclick="showScreen('profile-screen')" style="background:none; border:none; color:#fff; cursor:pointer; font-size:14px; margin-bottom:10px;">← Back</button>
+    <button onclick="showScreen('profile-screen')" class="btn" style="width:auto; padding:6px 14px; margin-bottom:15px; font-size:13px;">← Back</button>
     <h3>Publish New Content</h3>
 
     <form id="publish-form" onsubmit="handlePublish(event)">
@@ -396,6 +394,7 @@
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const target = document.getElementById(screenId);
     if(target) target.classList.add('active');
+    window.scrollTo(0, 0);
   }
 
   function switchNav(element, screenId) {
@@ -509,4 +508,5 @@
 </script>
 
 </body>
-</html>
+  </html>
+          
