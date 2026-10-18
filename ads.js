@@ -1,5 +1,5 @@
 /* ============================================================================
-   ads.js — Light Sun Library ad slots  (v4)
+   ads.js — Light Sun Library ad slots  (v5)
    ----------------------------------------------------------------------------
    - Jis screen par ".ad-box" (— ADVERTISEMENT —) box hai, ad USKE ANDAR bhi
      aata hai, AUR screen ke sabse neeche bhi.
@@ -155,6 +155,8 @@
   function boot() {
     loadAdsense();
     ensureSlot();
+
+    /* turant + har screen badalne par */
     var target = document.getElementById("screens") || document.body;
     var pending = false;
     new MutationObserver(function () {
@@ -162,6 +164,9 @@
       pending = true;
       setTimeout(function () { pending = false; ensureSlot(); }, 60);
     }).observe(target, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+
+    /* safety net: har 1 second check (agar koi change chhoot jaye) */
+    setInterval(ensureSlot, 1000);
   }
 
   if (document.readyState === "loading") {
