@@ -1,22 +1,23 @@
 /* ============================================================================
-   ads.js — Light Sun Library ad slots
+   ads.js — Light Sun Library ad slots  (v4)
    ----------------------------------------------------------------------------
+   - Jis screen par ".ad-box" (— ADVERTISEMENT —) box hai, ad USKE ANDAR bhi
+     aata hai, AUR screen ke sabse neeche bhi.
+   - Jis screen par wo box nahi hai, wahan ad sirf neeche aata hai.
+   - Reader ke andar (book pages par) ads NAHI aate.
+   - Adsterra code document.write use karta hai, isliye wo ek iframe ke andar
+     chalta hai (warna poora app blank ho sakta tha).
+
    Lagane ka tarika:
-   1) Is file ko repo me "ads.js" naam se upload karo (root me, purani ke upar).
-   2) index.html me, </body> se pehle ye line ho (protect.js ke NEECHE):
+   1) Is file ko repo me "ads.js" naam se upload karo (purani ke upar).
+   2) index.html me </body> se pehle ye line ho:
           <script src="ads.js"></script>
-
-   Ads app ke har screen (Home/Comics/Save) ke sabse neeche, content ke baad
-   aate hain. Reader ke andar (book pages par) ads NAHI aate.
-
-   Adsterra ka code document.write use karta hai — isliye use ek iframe ke
-   andar chalaya gaya hai, taaki wo aapke poore app ko blank na kar de.
    ============================================================================ */
 (function () {
   "use strict";
 
   var CONFIG = {
-    /* ---- Google AdSense (optional, chhod do agar use nahi kar rahe) ---- */
+    /* ---- Google AdSense (optional) ---- */
     adsenseClient: "",
     adsenseSlot: "",
 
@@ -36,18 +37,21 @@
     adWidth: 320,
     adHeight: 50,
 
-    /* Setup ke dauraan "Ad space" box; ads lag jaane par false */
+    /* box ke alawa neeche bhi ad dikhana hai? */
+    alsoBottom: true,
+
     showPlaceholder: false
   };
 
   var SLOT_ID = "__lsl_ad";
+  var FILLED = "data-ad-filled";
 
-  /* Adsterra code ko iframe me likho (document.write ko isolate karta hai) */
+  /* Adsterra code ko iframe me likho (document.write isolate hota hai) */
   function makeAdFrame() {
     var ifr = document.createElement("iframe");
     ifr.style.cssText =
       "border:0;width:" + CONFIG.adWidth + "px;height:" + CONFIG.adHeight +
-      "px;overflow:hidden;background:transparent;";
+      "px;overflow:hidden;background:transparent;display:block;";
     ifr.setAttribute("scrolling", "no");
     ifr.setAttribute("frameborder", "0");
     ifr.setAttribute("title", "advertisement");
@@ -66,16 +70,10 @@
     return ifr;
   }
 
-  function makeSlot() {
-    var d = document.createElement("div");
-    d.id = SLOT_ID;
-    d.style.cssText =
-      "margin:16px 0 8px;min-height:50px;display:flex;" +
-      "align-items:center;justify-content:center;overflow:hidden;";
+  function buildAdContent() {
+    if (CONFIG.customHtml) return makeAdFrame();
 
-    if (CONFIG.customHtml) {
-      d.appendChild(makeAdFrame());
-    } else if (CONFIG.adsenseClient && CONFIG.adsenseSlot) {
+    if (CONFIG.adsenseClient && CONFIG.adsenseSlot) {
       var ins = document.createElement("ins");
       ins.className = "adsbygoogle";
       ins.style.cssText = "display:block;width:100%;";
@@ -83,17 +81,17 @@
       ins.setAttribute("data-ad-slot", CONFIG.adsenseSlot);
       ins.setAttribute("data-ad-format", "auto");
       ins.setAttribute("data-full-width-responsive", "true");
-      d.appendChild(ins);
       try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
-    } else if (CONFIG.showPlaceholder) {
-      d.style.cssText +=
-        "border:1px dashed #444;border-radius:10px;" +
-        "color:#777;font:600 12px system-ui,sans-serif;";
-      d.textContent = "Ad space";
-    } else {
-      return null;
+      return ins;
     }
-    return d;
+
+    if (CONFIG.showPlaceholder) {
+      var ph = document.createElement("div");
+      ph.style.cssText = "color:#777;font:600 12px system-ui,sans-serif;letter-spacing:1px;";
+      ph.textContent = "— ADVERTISEMENT —";
+      return ph;
+    }
+    return null;
   }
 
   function loadAdsense() {
@@ -112,14 +110,46 @@
     return document.querySelector("#screens .screen.active");
   }
 
-  function ensureSlot() {
-    var sc = activeScreen();
-    if (!sc) return;
+  /* .ad-box ko ad se bharo */
+  function fillBox(box) {
+    var content = buildAdContent();
+    if (!content) return;
+    box.setAttribute(FILLED, "1");
+    box.innerHTML = "";
+    box.style.cssText =
+      "background:transparent;border:0;padding:0;margin:14px 0;" +
+      "display:flex;align-items:center;justify-content:center;" +
+      "min-height:" + CONFIG.adHeight + "px;overflow:hidden;";
+    box.appendChild(content);
+  }
+
+  /* screen ke sabse neeche ek ad slot lagao */
+  function addBottomSlot(sc) {
+    if (!CONFIG.alsoBottom) return;
     if (sc.lastElementChild && sc.lastElementChild.id === SLOT_ID) return;
     var old = sc.querySelector("#" + SLOT_ID);
     if (old) old.remove();
-    var slot = makeSlot();
-    if (slot) sc.appendChild(slot);
+    var content = buildAdContent();
+    if (!content) return;
+    var d = document.createElement("div");
+    d.id = SLOT_ID;
+    d.style.cssText =
+      "margin:16px 0 8px;min-height:" + CONFIG.adHeight + "px;display:flex;" +
+      "align-items:center;justify-content:center;overflow:hidden;";
+    d.appendChild(content);
+    sc.appendChild(d);
+  }
+
+  function ensureSlot() {
+    var sc = activeScreen();
+    if (!sc) return;
+
+    /* 1) .ad-box ho to use bhi bharo */
+    var box = sc.querySelector(".ad-box");
+    if (box && box.getAttribute(FILLED) !== "1") fillBox(box);
+
+    /* 2) neeche bhi ad lagao */
+    addBottomSlot(sc);
   }
 
   function boot() {
