@@ -1,13 +1,13 @@
-/* pwa.js — Light Sun Library ko installable APP banata hai  (v2)
+/* pwa.js — Light Sun Library ko installable APP banata hai  (v3)
    ----------------------------------------------------------------------------
-   - manifest + icons + service worker laga deta hai.
-   - Android/Chrome: "Install App" button dikhata hai.
-   - iPhone/Safari: "Add to Home Screen" ka tarika batata hai.
+   NAYA v3:
+   - "Install App" button ab Publish/Edit form ya reader ke upar nahi chadhta
+     (jab koi popup khula ho to button chhup jaata hai).
 
    Lagane ka tarika:
    1) manifest.json, sw.js, pwa.js, icon-192.png, icon-512.png
       — ye paanch files repo me upload karo (index.html ke saath, usi folder me).
-   2) index.html me </body> se pehle ye line daalo:
+   2) index.html me </body> se pehle ye line ho:
           <script src="pwa.js"></script>
    ============================================================================ */
 (function () {
@@ -34,21 +34,40 @@
   meta("apple-mobile-web-app-status-bar-style", "black-translucent");
   meta("apple-mobile-web-app-title", "Light Sun");
 
-  /* ---- service worker (install + offline) ---- */
+  /* ---- service worker ---- */
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () {
       navigator.serviceWorker.register("./sw.js").catch(function () {});
     });
   }
 
-  /* ---- "Install App" button ---- */
+  /* ---- overlay (popup/reader) khula hai? ---- */
+  function overlayOpen() {
+    var ids = ["modal", "reader"];
+    for (var i = 0; i < ids.length; i++) {
+      var el = document.getElementById(ids[i]);
+      if (el && el.classList && el.classList.contains("show")) return true;
+    }
+    return false;
+  }
+
   var deferred = null;
   var isStandalone = window.matchMedia("(display-mode: standalone)").matches ||
     window.navigator.standalone === true;
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
+  function installBtn() { return document.getElementById("__pwa_install"); }
+
+  function syncVisibility() {
+    var b = installBtn();
+    if (!b) return;
+    var show = !overlayOpen();
+    b.style.display = show ? "inline-block" : "none";
+    b.style.pointerEvents = show ? "auto" : "none";
+  }
+
   function makeButton(label, onClick) {
-    if (document.getElementById("__pwa_install")) return;
+    if (installBtn()) return;
     var b = document.createElement("button");
     b.id = "__pwa_install";
     b.type = "button";
@@ -61,8 +80,17 @@
       "box-shadow:0 8px 24px rgba(255,152,0,.5);cursor:pointer;";
     b.addEventListener("click", onClick);
     document.body.appendChild(b);
+    syncVisibility();
     setTimeout(function () { if (b.parentNode) b.remove(); }, 15000);
   }
+
+  /* popup khulte/band hote hi button chhupa/ dikhao */
+  ["modal", "reader"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) {
+      new MutationObserver(syncVisibility).observe(el, { attributes: true, attributeFilter: ["class"] });
+    }
+  });
 
   function iosHint() {
     var ov = document.createElement("div");
@@ -89,7 +117,7 @@
     e.preventDefault();
     deferred = e;
     makeButton("\u2B07  Install App", function () {
-      var b = document.getElementById("__pwa_install");
+      var b = installBtn();
       if (!deferred) { if (b) b.remove(); return; }
       deferred.prompt();
       if (deferred.userChoice) {
@@ -99,16 +127,13 @@
   });
 
   window.addEventListener("appinstalled", function () {
-    var b = document.getElementById("__pwa_install");
+    var b = installBtn();
     if (b) b.remove();
   });
 
-  /* iPhone par install ka tarika (agar pehle se installed nahi) */
   if (isIOS && !isStandalone) {
     window.addEventListener("load", function () {
-      setTimeout(function () {
-        makeButton("\u2B07  App install karo", iosHint);
-      }, 4000);
+      setTimeout(function () { makeButton("\u2B07  App install karo", iosHint); }, 4000);
     });
   }
 })();
