@@ -1,7 +1,19 @@
-/* sw.js — Light Sun Library service worker (v2)
-   App ko installable banata hai + offline support deta hai.
-   Cross-origin requests (ads, video ad, IMA) ko chhedta nahi. */
-const CACHE = "lsl-v2";
+/* sw.js — Light Sun Library service worker (v3)
+   ----------------------------------------------------------------------------
+   NAYA v3 (zaroori fix):
+   - Pehle ye purani files cache se dikhata tha, isliye app update karne par
+     bhi purana code chalta rehta tha (jaise Publish form me Price field).
+   - Ab: HTML aur .js files ke liye NETWORK-FIRST — yaani hamesha naya code
+     pehle aayega, internet na ho to cache se chalega.
+   - Icons/manifest cache-first (tez).
+   - Purana cache (lsl-v2) delete ho jayega.
+
+   Lagane ka tarika:
+   1) Is file ko repo me "sw.js" naam se upload karo (purani ke upar).
+   2) Phone par site ko 2 baar reload karo (ya app band karke dobara kholo),
+      taaki naya service worker lag jaye.
+   ============================================================================ */
+const CACHE = "lsl-v3";
 const CORE = [
   "./",
   "./index.html",
@@ -11,7 +23,9 @@ const CORE = [
   "./protect.js",
   "./ads.js",
   "./free.js",
-  "./pwa.js"
+  "./pwa.js",
+  "./tts.js",
+  "./webtoon.js"
 ];
 
 self.addEventListener("install", (e) => {
@@ -36,16 +50,31 @@ self.addEventListener("fetch", (e) => {
   let url;
   try { url = new URL(req.url); } catch (_) { return; }
 
-  /* sirf apni site — ads/video-ad/IMA ko pass-through */
+  /* sirf apni site — ads/video ad/IMA ko pass-through */
   if (url.origin !== self.location.origin) return;
 
-  /* page kholna: pehle network, na mile to cache */
-  if (req.mode === "navigate") {
-    e.respondWith(fetch(req).catch(() => caches.match("./index.html")));
+  const isDoc = req.mode === "navigate" || req.destination === "document";
+  const isCode = /\.(?:js|css|json)$/i.test(url.pathname);
+
+  /* HTML + code: pehle network (naya code), na mile to cache */
+  if (isDoc || isCode) {
+    e.respondWith(
+      fetch(req)
+        .then((res) => {
+          if (res && res.status === 200 && res.type === "basic") {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+          }
+          return res;
+        })
+        .catch(() =>
+          caches.match(req).then((hit) => hit || caches.match("./index.html"))
+        )
+    );
     return;
   }
 
-  /* baaki files: pehle cache, warna network (aur cache me daal do) */
+  /* images / icons: pehle cache (tez), warna network */
   e.respondWith(
     caches.match(req).then((hit) => {
       if (hit) return hit;
@@ -59,3 +88,4 @@ self.addEventListener("fetch", (e) => {
     })
   );
 });
+
