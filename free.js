@@ -1,12 +1,10 @@
-/* free.js — Light Sun Library  (v2)
+/* free.js — Light Sun Library  (v3)
    ----------------------------------------------------------------------------
    1) PAYMENT / VIP HATAO -> SAB FREE
-      - Har kitaab/comic free (koi Unlock/Pay nahi).
-      - VIP card aur ₹199 wala payment button chhup jaata hai.
-      - Earnings card bhi chhup jaata hai.
-   2) PADHNE SE PEHLE AD (1-2 minute)
-      - Book/comic kholne par pehle ad + timer dikhta hai.
-      - Timer khatam hone par "Continue to read" chalu hota hai.
+   2) PADHNE SE PEHLE VIDEO AD
+      - Book/comic kholne par ek VIDEO ad chalta hai (VAST tag se).
+      - Ad khatam hone par "Continue to read" aata hai -> phir reader khulta hai.
+      - Agar video load na ho, to banner ad + timer (fallback) dikhta hai.
 
    Lagane ka tarika:
    1) Is file ko repo me "free.js" naam se upload karo (purani ke upar).
@@ -17,10 +15,16 @@
   "use strict";
 
   var CONFIG = {
-    /* ad kitne second dikhe (60 = 1 min, 120 = 2 min) */
-    adSeconds: 90,
+    /* VAST video ad tag */
+    vastUrl: "https://www.videosprofitnetwork.com/watch.xml?key=628df5f23242ea44f505d66d46d45c08",
 
-    /* ad (Adsterra banner) */
+    /* video shuru hone ka intezaar (ms) — itne me na chale to fallback */
+    vastTimeoutMs: 9000,
+
+    /* agar video na chale (fallback) -> banner + itne second */
+    fallbackSeconds: 30,
+
+    /* fallback banner (Adsterra 320x50) */
     adWidth: 320,
     adHeight: 50,
     adCode:
@@ -35,14 +39,14 @@
 <\/script>
 <script src="https://bauval.org/22/a02b6cdb91f307e4f365fc8ae37e219c"><\/script>`,
 
-    /* true = VIP/payment poori tarah hata do (sabko ad dikhega) */
+    /* true = VIP/payment poori tarah hata do */
     removeVip: true
   };
 
   function safe(fn) { try { fn(); } catch (e) {} }
 
   /* =====================================================================
-     PART 1 — payment / VIP hatao, sab free
+     PART 1 — sab free
      ===================================================================== */
 
   var css = document.createElement("style");
@@ -51,7 +55,9 @@
     "#__lsl_earnings{display:none!important}" +
     ".lock-note{display:none!important}" +
     ".pay-methods{display:none!important}" +
-    ".lock-badge{display:none!important}";
+    ".lock-badge{display:none!important}" +
+    "#__lsl_gate video{width:100%;max-width:420px;height:auto;background:#000;" +
+      "border-radius:10px;display:block;}";
   (document.head || document.documentElement).appendChild(css);
 
   safe(function () { window.isPaid = function () { return false; }; });
@@ -60,13 +66,10 @@
     window.priceLabel = function () { return { html: '<span class="free">FREE</span>' }; };
   });
   safe(function () { window.unlockPrice = function () { return 0; }; });
-
   if (CONFIG.removeVip) {
     safe(function () { window.isVip = function () { return false; }; });
     safe(function () { if (window.updateBadge) updateBadge(); });
   }
-
-  /* purane items ke price hata do (memory me) -> har jagah FREE */
   safe(function () {
     if (typeof state !== "undefined" && state.items) {
       state.items.forEach(function (i) { i.price = 0; });
@@ -74,43 +77,34 @@
   });
 
   /* =====================================================================
-     PART 2 — padhne se pehle ad
+     PART 2 — padhne se pehle VIDEO AD
      ===================================================================== */
 
   var GATE_ID = "__lsl_gate";
+  var IMA_SRC = "https://imasdk.googleapis.com/js/sdkloader/ima3.js";
+  var imaLoading = null;
 
-  function showGate(onDone) {
-    if (document.getElementById(GATE_ID)) return;
+  function loadIMA() {
+    if (window.google && window.google.ima) return Promise.resolve();
+    if (imaLoading) return imaLoading;
+    imaLoading = new Promise(function (resolve, reject) {
+      var s = document.createElement("script");
+      s.src = IMA_SRC;
+      s.async = true;
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error("IMA load failed")); };
+      document.head.appendChild(s);
+    });
+    return imaLoading;
+  }
 
-    var ov = document.createElement("div");
-    ov.id = GATE_ID;
-    ov.style.cssText =
-      "position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.95);" +
-      "display:flex;flex-direction:column;align-items:center;justify-content:center;" +
-      "padding:22px;text-align:center;color:#f4f4f6;" +
-      "font-family:system-ui,-apple-system,sans-serif;";
-
-    ov.innerHTML =
-      '<div style="font-size:11.5px;letter-spacing:2px;color:#9a9aa6;' +
-        'font-weight:800;margin-bottom:14px;">ADVERTISEMENT</div>' +
-      '<div id="__lsl_gate_ad" style="background:#0f0f14;border:1px solid #26262f;' +
-        'border-radius:14px;padding:14px;display:flex;align-items:center;' +
-        'justify-content:center;overflow:hidden;min-height:' + (CONFIG.adHeight + 28) + 'px;"></div>' +
-      '<div id="__lsl_gate_timer" style="margin-top:20px;font-size:15px;color:#9a9aa6;"></div>' +
-      '<button id="__lsl_gate_go" disabled style="margin-top:18px;padding:13px 28px;border:0;' +
-        'border-radius:12px;background:#33333d;color:#8a8a95;font-weight:900;font-size:15px;' +
-        'cursor:not-allowed;">Continue to read</button>';
-
-    document.body.appendChild(ov);
-
-    var box = ov.querySelector("#__lsl_gate_ad");
+  function bannerFrame() {
     var ifr = document.createElement("iframe");
     ifr.style.cssText = "border:0;width:" + CONFIG.adWidth + "px;height:" +
       CONFIG.adHeight + "px;overflow:hidden;background:transparent;";
     ifr.setAttribute("scrolling", "no");
     ifr.setAttribute("frameborder", "0");
     ifr.setAttribute("title", "advertisement");
-    box.appendChild(ifr);
     setTimeout(function () {
       try {
         var d = ifr.contentWindow.document;
@@ -121,35 +115,136 @@
         d.close();
       } catch (e) {}
     }, 0);
+    return ifr;
+  }
 
-    var left = CONFIG.adSeconds;
+  function showGate(onDone) {
+    if (document.getElementById(GATE_ID)) return;
+
+    var ov = document.createElement("div");
+    ov.id = GATE_ID;
+    ov.style.cssText =
+      "position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.96);" +
+      "display:flex;flex-direction:column;align-items:center;justify-content:center;" +
+      "padding:20px;text-align:center;color:#f4f4f6;" +
+      "font-family:system-ui,-apple-system,sans-serif;";
+
+    ov.innerHTML =
+      '<div style="font-size:11.5px;letter-spacing:2px;color:#9a9aa6;' +
+        'font-weight:800;margin-bottom:14px;">ADVERTISEMENT</div>' +
+      '<div id="__lsl_gate_ad" style="display:flex;align-items:center;' +
+        'justify-content:center;width:100%;max-width:440px;min-height:60px;"></div>' +
+      '<div id="__lsl_gate_timer" style="margin-top:18px;font-size:14.5px;color:#9a9aa6;">' +
+        "Ad load ho raha hai\u2026</div>" +
+      '<button id="__lsl_gate_go" disabled style="margin-top:16px;padding:13px 28px;border:0;' +
+        'border-radius:12px;background:#33333d;color:#8a8a95;font-weight:900;font-size:15px;' +
+        'cursor:not-allowed;">Continue to read</button>';
+
+    document.body.appendChild(ov);
+
+    var adBox = ov.querySelector("#__lsl_gate_ad");
     var timer = ov.querySelector("#__lsl_gate_timer");
     var go = ov.querySelector("#__lsl_gate_go");
+    var finished = false;
 
-    function tick() {
-      if (left <= 0) {
-        timer.textContent = "Aap padhna shuru kar sakte ho";
-        go.disabled = false;
-        go.style.background = "linear-gradient(180deg,#ffb340,#ff9800)";
-        go.style.color = "#1a1205";
-        go.style.cursor = "pointer";
-        return;
-      }
-      var m = Math.floor(left / 60), s = left % 60;
-      timer.textContent = "Ad khatam hone me: " +
-        (m > 0 ? m + ":" + (s < 10 ? "0" : "") + s : s + "s");
-      left--;
-      setTimeout(tick, 1000);
+    function enable() {
+      if (finished) return;
+      finished = true;
+      timer.textContent = "Aap padhna shuru kar sakte ho";
+      go.disabled = false;
+      go.style.background = "linear-gradient(180deg,#ffb340,#ff9800)";
+      go.style.color = "#1a1205";
+      go.style.cursor = "pointer";
     }
-    tick();
 
     go.addEventListener("click", function () {
       if (go.disabled) return;
       ov.remove();
       onDone();
     });
+
+    /* ---- fallback: banner + countdown ---- */
+    function fallback() {
+      adBox.innerHTML = "";
+      var wrap = document.createElement("div");
+      wrap.style.cssText = "background:#0f0f14;border:1px solid #26262f;border-radius:14px;" +
+        "padding:14px;display:flex;align-items:center;justify-content:center;";
+      wrap.appendChild(bannerFrame());
+      adBox.appendChild(wrap);
+
+      var left = CONFIG.fallbackSeconds;
+      (function tick() {
+        if (left <= 0) { enable(); return; }
+        timer.textContent = "Ad khatam hone me: " + left + "s";
+        left--;
+        setTimeout(tick, 1000);
+      })();
+    }
+
+    /* ---- video ad (VAST via Google IMA) ---- */
+    var done = false;
+    var guard = setTimeout(function () {
+      if (!done) { done = true; fallback(); }
+    }, CONFIG.vastTimeoutMs);
+
+    loadIMA().then(function () {
+      var video = document.createElement("video");
+      video.setAttribute("playsinline", "");
+      video.setAttribute("webkit-playsinline", "");
+      video.setAttribute("muted", "");
+      adBox.appendChild(video);
+
+      var displayContainer = new google.ima.AdDisplayContainer(adBox, video);
+      var adsLoader = new google.ima.AdsLoader(displayContainer);
+
+      adsLoader.addEventListener(
+        google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
+        function (e) {
+          clearTimeout(guard);
+          var adsManager = e.getAdsManager(video);
+          var start = Date.now();
+
+          adsManager.addEventListener(google.ima.AdEvent.Type.STARTED, function () {
+            timer.textContent = "Ad chal raha hai\u2026";
+          });
+          adsManager.addEventListener(google.ima.AdEvent.Type.COMPLETE, function () { enable(); });
+          adsManager.addEventListener(google.ima.AdEvent.Type.ALL_ADS_COMPLETED, function () { enable(); });
+          adsManager.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR, function () {
+            if (Date.now() - start < 1500) fallback(); else enable();
+          });
+
+          try {
+            adsManager.init(
+              adBox.clientWidth || 320,
+              adBox.clientWidth ? Math.round(adBox.clientWidth * 9 / 16) : 180,
+              google.ima.ViewMode.NORMAL
+            );
+            adsManager.start();
+          } catch (err) { fallback(); }
+        }
+      );
+
+      adsLoader.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR, function () {
+        clearTimeout(guard);
+        fallback();
+      });
+
+      try { displayContainer.initialize(); } catch (e) {}
+
+      var req = new google.ima.AdsRequest();
+      req.adTagUrl = CONFIG.vastUrl;
+      req.linearAdSlotWidth = adBox.clientWidth || 320;
+      req.linearAdSlotHeight = 180;
+      req.nonLinearAdSlotWidth = 320;
+      req.nonLinearAdSlotHeight = 50;
+      try { adsLoader.requestAds(req); } catch (e) { clearTimeout(guard); fallback(); }
+    }).catch(function () {
+      clearTimeout(guard);
+      fallback();
+    });
   }
 
+  /* openReader ko wrap karo: pehle ad, phir reader */
   safe(function () {
     if (typeof window.openReader !== "function") return;
     var origOpenReader = window.openReader;
@@ -169,4 +264,4 @@
     else if (state.screen === "save" && window.renderSave) renderSave();
   });
 })();
-          
+     
