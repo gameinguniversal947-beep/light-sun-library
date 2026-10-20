@@ -1,7 +1,8 @@
-/* free.js — Light Sun Library  (v4)
+/* free.js — Light Sun Library  (v7)
    ----------------------------------------------------------------------------
    1) PAYMENT / VIP HATAO -> SAB FREE
-   2) PADHNE SE PEHLE VIDEO AD (awaaz ke saath)
+   2) PUBLISH FORM SE "PRICE (Rs)" FIELD HATAO + sab price 0 (permanent)
+   3) PADHNE SE PEHLE VIDEO AD (awaaz ke saath)
       - Book/comic kholne par gate aata hai.
       - User "Ad dekho" button dabata hai -> video ad AWAZ ke saath chalta hai.
       - Ad khatam -> "Continue to read" -> reader khulta hai.
@@ -18,6 +19,9 @@
   var CONFIG = {
     vastUrl: "https://www.videosprofitnetwork.com/watch.xml?key=628df5f23242ea44f505d66d46d45c08",
     vastTimeoutMs: 9000,     // video shuru na ho to itne ms me fallback
+
+    /* video ad kitna bada ho (px me). Chhota/bada karna ho to ye number badlo */
+    videoMaxWidth: 420,
     fallbackSeconds: 30,     // fallback banner kitne second
 
     adWidth: 320,
@@ -48,8 +52,8 @@
     ".lock-note{display:none!important}" +
     ".pay-methods{display:none!important}" +
     ".lock-badge{display:none!important}" +
-    "#__lsl_gate video{width:100%;max-width:420px;height:auto;background:#000;" +
-      "border-radius:10px;display:block;}";
+    "#__lsl_gate video{width:100%;max-width:" + CONFIG.videoMaxWidth + "px;height:auto;" +
+      "background:#000;border-radius:10px;display:block;}";
   (document.head || document.documentElement).appendChild(css);
 
   safe(function () { window.isPaid = function () { return false; }; });
@@ -62,10 +66,41 @@
     safe(function () { window.isVip = function () { return false; }; });
     safe(function () { if (window.updateBadge) updateBadge(); });
   }
+  /* purane items ke price 0 kar do — memory + save, taaki hamesha FREE rahe */
   safe(function () {
-    if (typeof state !== "undefined" && state.items) {
-      state.items.forEach(function (i) { i.price = 0; });
+    if (typeof state === "undefined" || !state.items) return;
+    var changed = false;
+    state.items.forEach(function (i) { if (i.price) { i.price = 0; changed = true; } });
+    if (changed && typeof persistAll === "function") persistAll();
+  });
+
+
+  /* ---- Publish form se "Price (Rs)" field hatao ---- */
+  function hidePriceField() {
+    var inp = document.getElementById("fPrice");
+    if (!inp) return;
+
+    var field = (inp.closest ? inp.closest(".field") : null) || inp.parentNode;
+    if (field && field.style) field.style.display = "none";
+
+    inp.value = "0";
+    inp.setAttribute("value", "0");
+
+    var v = document.getElementById("fVideo");
+    if (v && v.parentNode) {
+      var hint = v.parentNode.querySelector(".hint");
+      if (hint && /purchas|buyer/i.test(hint.textContent || "")) {
+        hint.textContent = "A YouTube (or other) link readers can watch before reading.";
+      }
     }
+  }
+
+  safe(function () {
+    var body = document.getElementById("modalBody");
+    if (!body) return;
+    hidePriceField();
+    new MutationObserver(function () { hidePriceField(); })
+      .observe(body, { childList: true, subtree: true });
   });
 
   /* ===================== PART 2 — video ad gate ===================== */
@@ -123,7 +158,8 @@
       '<div style="font-size:11.5px;letter-spacing:2px;color:#9a9aa6;' +
         'font-weight:800;margin-bottom:14px;">ADVERTISEMENT</div>' +
       '<div id="__lsl_gate_ad" style="display:flex;align-items:center;' +
-        'justify-content:center;width:100%;max-width:440px;min-height:60px;"></div>' +
+        'justify-content:center;width:100%;max-width:' + (CONFIG.videoMaxWidth + 24) + 'px;' +
+        'min-height:60px;"></div>' +
       '<div id="__lsl_gate_timer" style="margin-top:16px;font-size:14.5px;color:#9a9aa6;">' +
         "Ad dekhne ke liye tap karo</div>" +
       '<button id="__lsl_gate_play" style="margin-top:16px;padding:14px 30px;border:0;' +
@@ -229,8 +265,8 @@
 
         var req = new google.ima.AdsRequest();
         req.adTagUrl = CONFIG.vastUrl;
-        req.linearAdSlotWidth = adBox.clientWidth || 320;
-        req.linearAdSlotHeight = 180;
+        req.linearAdSlotWidth = adBox.clientWidth || CONFIG.videoMaxWidth;
+        req.linearAdSlotHeight = 150;
         req.nonLinearAdSlotWidth = 320;
         req.nonLinearAdSlotHeight = 50;
         try { adsLoader.requestAds(req); } catch (e) { clearTimeout(guard); fallback(); }
