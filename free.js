@@ -1,10 +1,11 @@
-/* free.js — Light Sun Library  (v3)
+/* free.js — Light Sun Library  (v4)
    ----------------------------------------------------------------------------
    1) PAYMENT / VIP HATAO -> SAB FREE
-   2) PADHNE SE PEHLE VIDEO AD
-      - Book/comic kholne par ek VIDEO ad chalta hai (VAST tag se).
-      - Ad khatam hone par "Continue to read" aata hai -> phir reader khulta hai.
-      - Agar video load na ho, to banner ad + timer (fallback) dikhta hai.
+   2) PADHNE SE PEHLE VIDEO AD (awaaz ke saath)
+      - Book/comic kholne par gate aata hai.
+      - User "Ad dekho" button dabata hai -> video ad AWAZ ke saath chalta hai.
+      - Ad khatam -> "Continue to read" -> reader khulta hai.
+      - Video na chale to banner ad + timer (fallback).
 
    Lagane ka tarika:
    1) Is file ko repo me "free.js" naam se upload karo (purani ke upar).
@@ -15,16 +16,10 @@
   "use strict";
 
   var CONFIG = {
-    /* VAST video ad tag */
     vastUrl: "https://www.videosprofitnetwork.com/watch.xml?key=628df5f23242ea44f505d66d46d45c08",
+    vastTimeoutMs: 9000,     // video shuru na ho to itne ms me fallback
+    fallbackSeconds: 30,     // fallback banner kitne second
 
-    /* video shuru hone ka intezaar (ms) — itne me na chale to fallback */
-    vastTimeoutMs: 9000,
-
-    /* agar video na chale (fallback) -> banner + itne second */
-    fallbackSeconds: 30,
-
-    /* fallback banner (Adsterra 320x50) */
     adWidth: 320,
     adHeight: 50,
     adCode:
@@ -39,15 +34,12 @@
 <\/script>
 <script src="https://bauval.org/22/a02b6cdb91f307e4f365fc8ae37e219c"><\/script>`,
 
-    /* true = VIP/payment poori tarah hata do */
     removeVip: true
   };
 
   function safe(fn) { try { fn(); } catch (e) {} }
 
-  /* =====================================================================
-     PART 1 — sab free
-     ===================================================================== */
+  /* ===================== PART 1 — sab free ===================== */
 
   var css = document.createElement("style");
   css.textContent =
@@ -76,9 +68,7 @@
     }
   });
 
-  /* =====================================================================
-     PART 2 — padhne se pehle VIDEO AD
-     ===================================================================== */
+  /* ===================== PART 2 — video ad gate ===================== */
 
   var GATE_ID = "__lsl_gate";
   var IMA_SRC = "https://imasdk.googleapis.com/js/sdkloader/ima3.js";
@@ -134,16 +124,22 @@
         'font-weight:800;margin-bottom:14px;">ADVERTISEMENT</div>' +
       '<div id="__lsl_gate_ad" style="display:flex;align-items:center;' +
         'justify-content:center;width:100%;max-width:440px;min-height:60px;"></div>' +
-      '<div id="__lsl_gate_timer" style="margin-top:18px;font-size:14.5px;color:#9a9aa6;">' +
-        "Ad load ho raha hai\u2026</div>" +
-      '<button id="__lsl_gate_go" disabled style="margin-top:16px;padding:13px 28px;border:0;' +
-        'border-radius:12px;background:#33333d;color:#8a8a95;font-weight:900;font-size:15px;' +
-        'cursor:not-allowed;">Continue to read</button>';
+      '<div id="__lsl_gate_timer" style="margin-top:16px;font-size:14.5px;color:#9a9aa6;">' +
+        "Ad dekhne ke liye tap karo</div>" +
+      '<button id="__lsl_gate_play" style="margin-top:16px;padding:14px 30px;border:0;' +
+        'border-radius:12px;background:linear-gradient(180deg,#ffb340,#ff9800);' +
+        'color:#1a1205;font-weight:900;font-size:16px;cursor:pointer;">' +
+        "\u25B6  Ad dekho</button>" +
+      '<button id="__lsl_gate_go" style="display:none;margin-top:16px;padding:13px 28px;' +
+        'border:0;border-radius:12px;background:linear-gradient(180deg,#ffb340,#ff9800);' +
+        'color:#1a1205;font-weight:900;font-size:15px;cursor:pointer;">' +
+        "Continue to read</button>";
 
     document.body.appendChild(ov);
 
     var adBox = ov.querySelector("#__lsl_gate_ad");
     var timer = ov.querySelector("#__lsl_gate_timer");
+    var playBtn = ov.querySelector("#__lsl_gate_play");
     var go = ov.querySelector("#__lsl_gate_go");
     var finished = false;
 
@@ -151,19 +147,15 @@
       if (finished) return;
       finished = true;
       timer.textContent = "Aap padhna shuru kar sakte ho";
-      go.disabled = false;
-      go.style.background = "linear-gradient(180deg,#ffb340,#ff9800)";
-      go.style.color = "#1a1205";
-      go.style.cursor = "pointer";
+      playBtn.style.display = "none";
+      go.style.display = "inline-block";
     }
 
     go.addEventListener("click", function () {
-      if (go.disabled) return;
       ov.remove();
       onDone();
     });
 
-    /* ---- fallback: banner + countdown ---- */
     function fallback() {
       adBox.innerHTML = "";
       var wrap = document.createElement("div");
@@ -181,70 +173,77 @@
       })();
     }
 
-    /* ---- video ad (VAST via Google IMA) ---- */
-    var done = false;
-    var guard = setTimeout(function () {
-      if (!done) { done = true; fallback(); }
-    }, CONFIG.vastTimeoutMs);
+    /* tap ke baad hi video chalta hai -> sound allowed */
+    function startVideo() {
+      playBtn.style.display = "none";
+      timer.textContent = "Ad load ho raha hai\u2026";
 
-    loadIMA().then(function () {
-      var video = document.createElement("video");
-      video.setAttribute("playsinline", "");
-      video.setAttribute("webkit-playsinline", "");
-      video.setAttribute("muted", "");
-      adBox.appendChild(video);
+      var done = false;
+      var guard = setTimeout(function () {
+        if (!done) { done = true; fallback(); }
+      }, CONFIG.vastTimeoutMs);
 
-      var displayContainer = new google.ima.AdDisplayContainer(adBox, video);
-      var adsLoader = new google.ima.AdsLoader(displayContainer);
+      loadIMA().then(function () {
+        var video = document.createElement("video");
+        video.setAttribute("playsinline", "");
+        video.setAttribute("webkit-playsinline", "");
+        adBox.appendChild(video);
 
-      adsLoader.addEventListener(
-        google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
-        function (e) {
+        var displayContainer = new google.ima.AdDisplayContainer(adBox, video);
+        var adsLoader = new google.ima.AdsLoader(displayContainer);
+
+        adsLoader.addEventListener(
+          google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
+          function (e) {
+            clearTimeout(guard);
+            var adsManager = e.getAdsManager(video);
+            var start = Date.now();
+
+            adsManager.addEventListener(google.ima.AdEvent.Type.STARTED, function () {
+              timer.textContent = "Ad chal raha hai\u2026";
+            });
+            adsManager.addEventListener(google.ima.AdEvent.Type.COMPLETE, function () { enable(); });
+            adsManager.addEventListener(google.ima.AdEvent.Type.ALL_ADS_COMPLETED, function () { enable(); });
+            adsManager.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR, function () {
+              if (Date.now() - start < 1500) fallback(); else enable();
+            });
+
+            try {
+              adsManager.init(
+                adBox.clientWidth || 320,
+                adBox.clientWidth ? Math.round(adBox.clientWidth * 9 / 16) : 180,
+                google.ima.ViewMode.NORMAL
+              );
+              adsManager.setVolume(1);      // sound ON
+              adsManager.start();
+            } catch (err) { fallback(); }
+          }
+        );
+
+        adsLoader.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR, function () {
           clearTimeout(guard);
-          var adsManager = e.getAdsManager(video);
-          var start = Date.now();
+          fallback();
+        });
 
-          adsManager.addEventListener(google.ima.AdEvent.Type.STARTED, function () {
-            timer.textContent = "Ad chal raha hai\u2026";
-          });
-          adsManager.addEventListener(google.ima.AdEvent.Type.COMPLETE, function () { enable(); });
-          adsManager.addEventListener(google.ima.AdEvent.Type.ALL_ADS_COMPLETED, function () { enable(); });
-          adsManager.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR, function () {
-            if (Date.now() - start < 1500) fallback(); else enable();
-          });
+        try { displayContainer.initialize(); } catch (e) {}
 
-          try {
-            adsManager.init(
-              adBox.clientWidth || 320,
-              adBox.clientWidth ? Math.round(adBox.clientWidth * 9 / 16) : 180,
-              google.ima.ViewMode.NORMAL
-            );
-            adsManager.start();
-          } catch (err) { fallback(); }
-        }
-      );
-
-      adsLoader.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR, function () {
+        var req = new google.ima.AdsRequest();
+        req.adTagUrl = CONFIG.vastUrl;
+        req.linearAdSlotWidth = adBox.clientWidth || 320;
+        req.linearAdSlotHeight = 180;
+        req.nonLinearAdSlotWidth = 320;
+        req.nonLinearAdSlotHeight = 50;
+        try { adsLoader.requestAds(req); } catch (e) { clearTimeout(guard); fallback(); }
+      }).catch(function () {
         clearTimeout(guard);
         fallback();
       });
+    }
 
-      try { displayContainer.initialize(); } catch (e) {}
-
-      var req = new google.ima.AdsRequest();
-      req.adTagUrl = CONFIG.vastUrl;
-      req.linearAdSlotWidth = adBox.clientWidth || 320;
-      req.linearAdSlotHeight = 180;
-      req.nonLinearAdSlotWidth = 320;
-      req.nonLinearAdSlotHeight = 50;
-      try { adsLoader.requestAds(req); } catch (e) { clearTimeout(guard); fallback(); }
-    }).catch(function () {
-      clearTimeout(guard);
-      fallback();
-    });
+    playBtn.addEventListener("click", startVideo);
   }
 
-  /* openReader ko wrap karo: pehle ad, phir reader */
+  /* openReader wrap: pehle ad, phir reader */
   safe(function () {
     if (typeof window.openReader !== "function") return;
     var origOpenReader = window.openReader;
@@ -254,7 +253,6 @@
     };
   });
 
-  /* khuli screen dobara render karo (FREE dikhane ke liye) */
   safe(function () {
     if (typeof state === "undefined") return;
     if (state.screen === "profile" && window.renderProfile) renderProfile();
@@ -264,4 +262,3 @@
     else if (state.screen === "save" && window.renderSave) renderSave();
   });
 })();
-     
