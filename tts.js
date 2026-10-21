@@ -1,10 +1,16 @@
-/* tts.js — Light Sun Library: "SUNO" (book padh ke sunaye)  (v5)
+/* tts.js — Light Sun Library: "SUNO" (book padh ke sunaye)  (v6)
    ----------------------------------------------------------------------------
    NAYA v3:
    - FIX: buttons reader ke PEECHHE chhup jaate the (z-index chhota tha).
      Ab wo reader ke upar dikhte hain.
 
-   NAYA v5:
+   NAYA v6:
+   - Bhasha button ab 11 bhashayein deta hai (हिंदी, English, বাংলা, मराठी, தமிழ்,
+     తెలుగు, ગુજરાતી, ಕನ್ನಡ, മലയാളം, ਪੰਜਾਬੀ, اردو). Button dabao -> list khulti hai.
+   - "सुनो" dabane par page ka text CHUNI HUI BHASHA ME TRANSLATE hokar sunaya jaata
+     hai. Agar translate na ho paaye to original text hi padh diya jaata hai.
+
+   v5:
    - Page khud-ba-khud BAHUT TEZ badal rahe the (khaali page par to ek ke baad ek
      flip hote the). Ab agla page khulne se pehle 1.8 second rukega, aur khaali
      page par turant ruk jayega. Page badalne ke liye apna "Next" button bhi hai.
@@ -30,14 +36,34 @@
 (function () {
   "use strict";
 
+  /* ---------- bhashayein (jitni zyada cover ho sakein) ---------- */
+  var LANGS = [
+    { c: "hi-IN", t: "hi", n: "हिंदी" },
+    { c: "en-IN", t: "en", n: "English" },
+    { c: "bn-IN", t: "bn", n: "বাংলা" },
+    { c: "mr-IN", t: "mr", n: "मराठी" },
+    { c: "ta-IN", t: "ta", n: "தமிழ்" },
+    { c: "te-IN", t: "te", n: "తెలుగు" },
+    { c: "gu-IN", t: "gu", n: "ગુજરાતી" },
+    { c: "kn-IN", t: "kn", n: "ಕನ್ನಡ" },
+    { c: "ml-IN", t: "ml", n: "മലയാളം" },
+    { c: "pa-IN", t: "pa", n: "ਪੰਜਾਬੀ" },
+    { c: "ur-IN", t: "ur", n: "اردو" }
+  ];
+  function curLang() { return LANGS[Math.max(0, Math.min(LANGS.length - 1, CONFIG.langIdx))]; }
+
   var CONFIG = {
-    lang: "hi-IN",       // default voice: Hindi
+    langIdx: 0,          // LANGS me se kaunsi bhasha (0 = हिंदी)
     rate: 1,             // bolne ki speed
     pitch: 1,
+    translate: true,     // page ka text chuni hui bhasha me translate karke padho
     autoContinue: true,  // page khatam -> agla page
     gapMs: 900,
-    turnMs: 1800,        // agla page khulne se pehle kitna rukna hai (tez flipping rokne ke liye)
-    chunkSize: 180       // itne characters ke hisson me text toot kar sunta hai
+    turnMs: 1800,        // agla page khulne se pehle kitna rukna hai
+    chunkSize: 180,      // itne characters ke hisson me text toot kar sunta hai
+    trChunk: 900,        // translate ke liye ek baar me itne character
+    trMs: 9000,          // translate ka timeout
+    trUrl: "https://translate.googleapis.com/translate_a/single"
   };
 
   var st = { on: false, internal: false, emptyStreak: 0, queue: [], qi: 0 };
@@ -95,7 +121,7 @@
   function speakAll(text, done) {
     try { synth.cancel(); } catch (e) {}
     var parts = chunk(text, CONFIG.chunkSize);
-    var voice = pickVoice(CONFIG.lang);
+    var voice = pickVoice(curLang().c);
 
     function step() {
       if (!st.on) return;
@@ -149,11 +175,49 @@
         return;
       }
       st.emptyStreak = 0;
-      if (!pickVoice(CONFIG.lang) && CONFIG.lang.indexOf("hi") === 0) {
-        toastMsg("Hindi voice phone me nahi hai \u2014 Settings > Text-to-speech se install karo");
+      if (!pickVoice(curLang().c)) {
+        toastMsg(curLang().n + " ki voice phone me nahi hai \u2014 Settings > Text-to-speech se install karo");
       }
-      speakAll(t, goNext);
+      translateText(t).then(function (out) {
+        if (!st.on) return;
+        speakAll(out || t, goNext);
+      });
     });
+  }
+
+  /* ---------- translate (page ka text -> chuni hui bhasha) ---------- */
+  function fetchT(url, ms) {
+    return new Promise(function (res, rej) {
+      var ctl = ("AbortController" in window) ? new AbortController() : null;
+      var t = setTimeout(function () { if (ctl) { try { ctl.abort(); } catch (e) {} } rej(new Error("timeout")); }, ms);
+      fetch(url, ctl ? { signal: ctl.signal } : undefined).then(function (r) {
+        clearTimeout(t); res(r);
+      }).catch(function (e) { clearTimeout(t); rej(e); });
+    });
+  }
+
+  function trOne(text, to) {
+    var url = CONFIG.trUrl + "?client=gtx&sl=auto&tl=" + encodeURIComponent(to) +
+              "&dt=t&q=" + encodeURIComponent(text);
+    return fetchT(url, CONFIG.trMs).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j || !j[0]) return null;
+      var out = "";
+      j[0].forEach(function (seg) { if (seg && seg[0]) out += seg[0]; });
+      return out || null;
+    });
+  }
+
+  function translateText(text) {
+    if (!CONFIG.translate || !text) return Promise.resolve(text);
+    var to = curLang().t;
+    var parts = chunk(text, CONFIG.trChunk);
+    return Promise.all(parts.map(function (p) {
+      return trOne(p, to).catch(function () { return null; });
+    })).then(function (arr) {
+      for (var i = 0; i < arr.length; i++) if (arr[i] === null) return text;   // koi fail -> original
+      var out = arr.join(" ");
+      return out || text;
+    }).catch(function () { return text; });
   }
 
   /* ---------- start / stop ---------- */
@@ -174,7 +238,7 @@
     var b = document.getElementById("__tts_btn");
     if (b) b.textContent = st.on ? "\u23F9  रोको" : "\uD83D\uDD0A  सुनो";
     var l = document.getElementById("__tts_lang");
-    if (l) l.textContent = CONFIG.lang === "hi-IN" ? "हिंदी" : "English";
+    if (l) l.textContent = curLang().n;
   }
 
   function mkBtn(id, text, bottom, onClick) {
@@ -191,6 +255,35 @@
     return b;
   }
 
+  function openLangMenu() {
+    var ex = document.getElementById("__tts_menu");
+    if (ex) { ex.remove(); return; }
+    var m = document.createElement("div");
+    m.id = "__tts_menu";
+    m.style.cssText =
+      "position:fixed;right:14px;bottom:calc(176px + env(safe-area-inset-bottom));z-index:345;" +
+      "background:#1b1b22;border:1px solid #33333d;border-radius:14px;padding:6px;display:flex;" +
+      "flex-direction:column;gap:2px;max-height:50vh;overflow:auto;box-shadow:0 10px 30px rgba(0,0,0,.55);";
+    LANGS.forEach(function (L, i) {
+      var it = document.createElement("button");
+      it.type = "button";
+      it.textContent = L.n;
+      it.style.cssText =
+        "border:0;background:" + (i === CONFIG.langIdx ? "#2a2a33" : "transparent") + ";" +
+        "color:" + (i === CONFIG.langIdx ? "#ffb340" : "#e7e7ee") + ";text-align:left;" +
+        "font:800 14px system-ui,-apple-system,sans-serif;padding:10px 18px;border-radius:10px;cursor:pointer;";
+      it.addEventListener("click", function () {
+        CONFIG.langIdx = i;
+        try { m.remove(); } catch (e) {}
+        updateLabel();
+        toastMsg("Bhasha: " + L.n);
+        if (st.on) { try { synth.cancel(); } catch (e) {} st.qi = 0; setTimeout(readCurrent, 200); }
+      });
+      m.appendChild(it);
+    });
+    document.body.appendChild(m);
+  }
+
   function inject() {
     if (!document.body) return;
     if (!document.getElementById("__tts_btn")) {
@@ -200,11 +293,7 @@
       b.style.border = "0";
     }
     if (!document.getElementById("__tts_lang")) {
-      mkBtn("__tts_lang", "हिंदी", 126, function () {
-        CONFIG.lang = CONFIG.lang === "hi-IN" ? "en-IN" : "hi-IN";
-        updateLabel();
-        if (st.on) { try { synth.cancel(); } catch (e) {} st.qi = 0; setTimeout(readCurrent, 200); }
-      });
+      mkBtn("__tts_lang", curLang().n, 126, openLangMenu);
     }
   }
 
@@ -215,7 +304,7 @@
       var el = document.getElementById(id);
       if (el) el.style.display = on ? "block" : "none";
     });
-    if (!on) stopSpeech();
+    if (!on) { stopSpeech(); var mm = document.getElementById("__tts_menu"); if (mm) mm.remove(); }
   }
 
   inject();
@@ -240,3 +329,4 @@
   var closeBtn = document.getElementById("readerClose");
   if (closeBtn) closeBtn.addEventListener("click", stopSpeech);
 })();
+                                         
