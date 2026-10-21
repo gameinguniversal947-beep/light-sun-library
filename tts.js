@@ -1,13 +1,21 @@
-/* tts.js — Light Sun Library: "SUNO" (book padh ke sunaye)  (v3)
+/* tts.js — Light Sun Library: "SUNO" (book padh ke sunaye)  (v5)
    ----------------------------------------------------------------------------
    NAYA v3:
    - FIX: buttons reader ke PEECHHE chhup jaate the (z-index chhota tha).
      Ab wo reader ke upar dikhte hain.
 
+   NAYA v5:
+   - Page khud-ba-khud BAHUT TEZ badal rahe the (khaali page par to ek ke baad ek
+     flip hote the). Ab agla page khulne se pehle 1.8 second rukega, aur khaali
+     page par turant ruk jayega. Page badalne ke liye apna "Next" button bhi hai.
+
+   v4:
+   - Speed button (1x / 2x / 3x) hata diya — ab sirf 2 button:
+     "सुनो / रोको"  aur  "हिंदी / English".
+
    v2:
    - Lamba page ab poora sunata hai (text chhote hisson me toot kar sunta hai,
      isliye browser beech me chup nahi hota).
-   - Speed button: 1x / 2x / 3x — tap karke bolne ki raftaar badal sakte ho.
 
    - Reader me "🔊 सुनो" button aata hai. Dabane par page ZOR SE padh ke sunata hai.
    - Default voice: HINDI. "हिंदी / English" button se badal sakte ho.
@@ -28,6 +36,7 @@
     pitch: 1,
     autoContinue: true,  // page khatam -> agla page
     gapMs: 900,
+    turnMs: 1800,        // agla page khulne se pehle kitna rukna hai (tez flipping rokne ke liye)
     chunkSize: 180       // itne characters ke hisson me text toot kar sunta hai
   };
 
@@ -119,7 +128,7 @@
       try { if (typeof readerGoto === "function") readerGoto(r.page + 1); } catch (e) {}
       st.internal = false;
       setTimeout(readCurrent, CONFIG.gapMs);
-    }, 400);
+    }, CONFIG.turnMs);
   }
 
   function readCurrent() {
@@ -135,8 +144,8 @@
       if (!st.on) return;
       if (!t) {
         st.emptyStreak++;
-        if (st.emptyStreak > 5) { stopSpeech(); toastMsg("Is page par text nahi mila"); return; }
-        goNext();
+        if (st.emptyStreak > 2) { stopSpeech(); toastMsg("Is page par text nahi mila \u2014 ruk gaya"); return; }
+        setTimeout(goNext, CONFIG.turnMs);
         return;
       }
       st.emptyStreak = 0;
@@ -166,8 +175,6 @@
     if (b) b.textContent = st.on ? "\u23F9  रोको" : "\uD83D\uDD0A  सुनो";
     var l = document.getElementById("__tts_lang");
     if (l) l.textContent = CONFIG.lang === "hi-IN" ? "हिंदी" : "English";
-    var s = document.getElementById("__tts_speed");
-    if (s) s.textContent = (CONFIG.rate === 1 ? "1x" : CONFIG.rate + "x");
   }
 
   function mkBtn(id, text, bottom, onClick) {
@@ -199,19 +206,12 @@
         if (st.on) { try { synth.cancel(); } catch (e) {} st.qi = 0; setTimeout(readCurrent, 200); }
       });
     }
-    if (!document.getElementById("__tts_speed")) {
-      mkBtn("__tts_speed", "1x", 178, function () {
-        CONFIG.rate = CONFIG.rate === 1 ? 2 : (CONFIG.rate === 2 ? 3 : 1);
-        updateLabel();
-        if (st.on) { try { synth.cancel(); } catch (e) {} st.qi = 0; setTimeout(readCurrent, 200); }
-      });
-    }
   }
 
   function sync() {
     var r = document.getElementById("reader");
     var on = !!(r && r.classList.contains("show"));
-    ["__tts_btn", "__tts_lang", "__tts_speed"].forEach(function (id) {
+    ["__tts_btn", "__tts_lang"].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.style.display = on ? "block" : "none";
     });
