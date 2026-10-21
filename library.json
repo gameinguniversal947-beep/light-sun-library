@@ -1,0 +1,45 @@
+{
+  "_howto": "Yahi aapki library ki list hai. Jo book/comic SABKO dikhani hai, uska entry niche 'books' list me add karo, aur uski file repo me (root me) upload karo. Sab files repo ke root folder me rakhni hain (books/ folder ki zaroorat nahi). Ek entry ke baad comma (,) lagana mat bhoolna.",
+  "_fields": {
+    "id": "chhota naam, sabhi ke liye alag (space nahi)",
+    "title": "kitaab ka naam (jo app me dikhega)",
+    "type": "book ya comic",
+    "file": "file ka naam (PDF ya CBZ), repo ke root me",
+    "cover": "cover image ka path (optional)",
+    "fileType": "pdf ya cbz",
+    "pages": "kul page (optional)",
+    "author": "lekhak / uploader ka naam (optional)"
+  },
+  "books": [
+    {
+      "id": "english-shabd-kosh-1261",
+      "title": "1261 English Shabd — Hindi Matlab ke Saath",
+      "type": "book",
+      "file": "English-Shabd-Kosh-Hindi.pdf",
+      "cover": "Shabd-Kosh-cover.jpg",
+      "fileType": "pdf",
+      "pages": 52,
+      "author": "Light Sun Library"
+    },
+    {
+      "id": "mahila-purush-jhagda",
+      "title": "Mahila aur Purush ka Jhagda",
+      "type": "book",
+      "file": "Mahila-aur-Purush-ka-Jhagda.pdf",
+      "cover": "mahila-cover.jpg",
+      "fileType": "pdf",
+      "pages": 4,
+      "author": "Light Sun Library"
+    },
+    {
+      "id": "chhota-suraj",
+      "title": "Chhota Suraj",
+      "type": "comic",
+      "file": "Chhota-Suraj.cbz",
+      "cover": "chhota-suraj-cover.jpg",
+      "fileType": "cbz",
+      "pages": 6,
+      "author": "Light Sun Library"
+    }
+  ]
+}
