@@ -1,4 +1,4 @@
-/* webtoon.js — Light Sun Library: comic ke liye SCROLL + AUTO-SCROLL + SUNO  (v1)
+/* webtoon.js — Light Sun Library: comic ke liye SCROLL + AUTO-SCROLL + SUNO  (v2)
    ----------------------------------------------------------------------------
    Sirf COMIC (CBZ) ke liye. Reader me teen chhote button aate hain:
 
@@ -288,7 +288,7 @@
     var bar = document.createElement("div");
     bar.id = "__wt_bar";
     bar.style.cssText =
-      "position:fixed;right:12px;bottom:calc(74px + env(safe-area-inset-bottom));z-index:61;" +
+      "position:fixed;right:12px;bottom:calc(74px + env(safe-area-inset-bottom));z-index:341;" +
       "display:none;flex-direction:column;gap:8px;align-items:flex-end;";
     document.body.appendChild(bar);
 
@@ -384,4 +384,3 @@
   updateBtns();
   sync();
 })();
-      
