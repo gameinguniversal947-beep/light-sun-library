@@ -1,6 +1,6 @@
-/* webtoon.js — Light Sun Library: comic ke liye SCROLL + AUTO-SCROLL + SUNO  (v2)
+/* webtoon.js — Light Sun Library: comic ke liye SCROLL + AUTO-SCROLL  (v4)
    ----------------------------------------------------------------------------
-   Sirf COMIC (CBZ) ke liye. Reader me teen chhote button aate hain:
+   Sirf COMIC (CBZ) ke liye. Reader me do chhote button aate hain:
 
      1)  📜  Scroll mode  — poori comic ek ke neeche ek, niche scroll karke padho
      2)  ▶   Auto-scroll  — dabao to comic khud scroll hone lagti hai
@@ -11,6 +11,16 @@
    NOTE: comic me text tasveer ke andar hota hai, isliye use padhne ke liye
    OCR (Tesseract) use hota hai — pehli baar thoda time aur data lagega,
    aur stylized text me galti ho sakti hai.
+
+   NAYA v4:
+   - "Suno" (speak) button HATA diya. Ab comic me sirf SCROLL ke button hain:
+       📜  Scroll mode      ▶  Auto-scroll (▶ dheere, ▶▶ medium, ▶▶▶ tez, phir OFF)
+   - Ye button SIRF comic (CBZ) me aate hain, book (PDF) me nahi.
+
+   v3:
+   - "Suno" ab page khud NAHI badalta. Jo page khula hai, bas usi ko padh ke sunata
+     hai, phir ruk jaata hai. Page badalne ke liye scroll karo ya Next dabao.
+   - Auto-scroll ke liye alag button hai (▶) — wahi scroll karta hai.
 
    Lagane ka tarika:
    1) Is file ko repo me "webtoon.js" naam se upload karo.
@@ -24,7 +34,7 @@
     scrollModeDefault: true,          // comic kholne par seedha scroll mode
     speeds: [0.45, 0.95, 1.7],        // px per frame (dheere / medium / tez)
     ocrLang: "eng",                   // comic ka text aksar English hota hai
-    ocrAutoNext: true,                // ek page sunne ke baad agla page
+    ocrAutoNext: false,               // sunne ke baad page khud na badle (scroll/Next se badlo)
     tesseractSrc: "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"
   };
 
@@ -302,10 +312,6 @@
     a.addEventListener("click", cycleAuto);
     bar.appendChild(a);
 
-    var v = mkBtn("__wt_voice", "\uD83D\uDD0A");
-    v.title = "Suno";
-    v.addEventListener("click", toggleVoice);
-    bar.appendChild(v);
   }
 
   function updateBtns() {
@@ -320,12 +326,6 @@
       a.textContent = auto.level === 0 ? "\u25B6" : ("\u25B6".repeat(auto.level));
       a.style.background = auto.level > 0 ? "#2a2a33" : "#1b1b22";
       a.style.color = auto.level > 0 ? "#ffb340" : "#e7e7ee";
-    }
-    var v = document.getElementById("__wt_voice");
-    if (v) {
-      v.textContent = voice.on ? "\u23F9" : "\uD83D\uDD0A";
-      v.style.background = voice.on ? "linear-gradient(180deg,#ffb340,#ff9800)" : "#1b1b22";
-      v.style.color = voice.on ? "#1a1205" : "#e7e7ee";
     }
   }
 
