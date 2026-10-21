@@ -1,6 +1,10 @@
-/* tts.js — Light Sun Library: "SUNO" (book padh ke sunaye)  (v2)
+/* tts.js — Light Sun Library: "SUNO" (book padh ke sunaye)  (v3)
    ----------------------------------------------------------------------------
-   NAYA v2:
+   NAYA v3:
+   - FIX: buttons reader ke PEECHHE chhup jaate the (z-index chhota tha).
+     Ab wo reader ke upar dikhte hain.
+
+   v2:
    - Lamba page ab poora sunata hai (text chhote hisson me toot kar sunta hai,
      isliye browser beech me chup nahi hota).
    - Speed button: 1x / 2x / 3x — tap karke bolne ki raftaar badal sakte ho.
@@ -173,7 +177,7 @@
     b.textContent = text;
     b.style.cssText =
       "position:fixed;right:14px;bottom:calc(" + bottom + "px + env(safe-area-inset-bottom));" +
-      "z-index:60;border:1px solid #33333d;border-radius:999px;padding:10px 16px;background:#1b1b22;" +
+      "z-index:340;border:1px solid #33333d;border-radius:999px;padding:10px 16px;background:#1b1b22;" +
       "color:#e7e7ee;font:800 13px system-ui,-apple-system,sans-serif;cursor:pointer;display:none;";
     b.addEventListener("click", onClick);
     document.body.appendChild(b);
@@ -236,4 +240,3 @@
   var closeBtn = document.getElementById("readerClose");
   if (closeBtn) closeBtn.addEventListener("click", stopSpeech);
 })();
-      
